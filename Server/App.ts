@@ -281,6 +281,7 @@ app.post('/searchUser', async (req, res) => {
 const connectedUsers: { [key: string]: string } = {};
 
 io.on('connection', (socket: Socket) => {
+  console.log('sockets activoOOOOOOOOOOOOOOOOOOOOOOOOOOs:', io.sockets.sockets.size);
   let groups = socket.handshake.query.groups as string | undefined;
   const username = socket.handshake.query.username as string | undefined;
   let groupsAmI: string[] = [];
@@ -372,8 +373,8 @@ io.on('connection', (socket: Socket) => {
     console.log('Audio data sent to all clients in room:', room);
   });
 
-  socket.on('disconnect', () => {
-    console.log(`User disconnected del socket: ${socket.id}`);
+  socket.on('disconnect', (reason) => {
+    console.log(`User disconnected del socket: ${socket.id} for ${reason}`);
     for (const username in connectedUsers) {
       if (connectedUsers[username] === socket.id) {
         delete connectedUsers[username];
@@ -406,7 +407,7 @@ io.on('connection', (socket: Socket) => {
 // =================================================================
 
 //==== fin solicitudes de amistad ===================================
-  sequelize.sync({ force: true }).then(() => {
+  sequelize.sync({ alter: true }).then(() => {
     app.listen(3000, () => {
       console.log('Express Server running on port 3000');
     });

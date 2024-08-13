@@ -27,13 +27,11 @@ const Index = () => {
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
         .then((res) => { setUserID(res.data.user.id) })
         .catch((error) => { console.log(error) });
+
+
       socket.on('receive_request', (data) => {
         console.log('Solicitud recibida de:', data.senderId);
       });
-      return () => {
-        console.log('Desconectando socket INDEX');
-        socket.disconnect();
-      };
     }
   }, [])
 

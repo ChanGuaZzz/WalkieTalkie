@@ -14,6 +14,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import io, { Socket } from 'socket.io-client';
 import { SocketProvider } from '../components/context/SocketContext';
+import createSocket from '../components/context/CreateSocket';
 
 
 export default function RootLayout() {
@@ -22,6 +23,7 @@ export default function RootLayout() {
   const SoftbackgroundColor = useThemeColor({}, 'Softbackground');
   const textColor = useThemeColor({}, 'text');
   const [username, setUsername] = useState('username');
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
 
   SetLayoutLogged = (value) => {
     setIsLoggedIn(value)
@@ -50,50 +52,43 @@ export default function RootLayout() {
   }, [isLoggedIn])
 
   // logout
-  const handleLogout = async () => {
+const handleLogout = async () => {
+  axios.post(`${SERVER_URL}/logout`)
+    .then((response) => {
+      if (socket) {
+        socket.disconnect();  // Desconectar el socket al desloguear
+        console.log('Socket desconectado en logout');
+        setIsSocketConnected(false);
+      }
+      AsyncStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
 
-    axios.post(`${SERVER_URL}/logout`)
-      .then((response) => {
-        AsyncStorage.removeItem('isLoggedIn');
-        setIsLoggedIn(false);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
 
 
-  const [socket, setSocket] = useState(null); // Estado para manejar la instancia del socket
+
+  const socket = createSocket(isLoggedIn, username) ;
 
   useEffect(() => {
-    if (isLoggedIn) {
-      let newsocket;
-      axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
-        .then((res) => {
-          newsocket = io(SOCKET_URL, { query: { groups: res.data.user.groups, username: res.data.user.username } });
-          setSocket(newsocket);
-        })
-        .catch((error) => { console.log(error) });
-      
-      return () => {
-        console.log('Desconectando socket LAYOUT');
-        if (socket != null) {
-        socket.disconnect();
-        }
-      };
+    if (socket != null) {
+      socket.on('connect', () => {
+        setIsSocketConnected(true);
+        console.log('ESTA CONECTADO');
+    });
     }
-  }, [isLoggedIn]);
+    
 
-  useEffect(() => {
-
-    console.log("SOCKET DE LA CONEXION EN EL LAYOUT", socket)
-  } ,[socket]);
+}, [socket]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
         {console.log("comprobarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr logeado: ", isLoggedIn, socket)}
-        {isLoggedIn && socket != null ? (
+        {isLoggedIn && isSocketConnected ? (
           <SocketProvider socket={socket}>
             <Stack screenOptions={{ animation: 'slide_from_right', }} >
               <Stack.Screen
