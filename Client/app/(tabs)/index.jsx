@@ -1,7 +1,6 @@
 //Client/app/(tabs)/index.jsx
-import { View, Text } from 'react-native';
+import { View, Text, Modal,TouchableOpacity,StyleSheet } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import tw from 'twrnc';
 import AudioComponent from '../../components/AudioComponent';
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -15,8 +14,11 @@ const Index = () => {
   const [currentRoom, setCurrentRoom] = useState(null);
   const rooms = ['room1', 'room2', 'room3', 'room4', 'room5'];
   const [userID, setUserID] = useState();
+  const [username, setUsername] = useState();
   const { SERVER_URL } = getEnvVars();
   const [socket, setSocket] = useState(useSocket());
+  const [modalVisible, setModalVisible] = useState(false);
+  const [request, setRequest] = useState([{ senderId: null, receiverId: null, message: null }]);
 
 
 
@@ -25,21 +27,69 @@ const Index = () => {
           console.log(socket, 'socket EN INDEX');
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-        .then((res) => { setUserID(res.data.user.id) })
+        .then((res) => { setUserID(res.data.user.id); setUsername(res.data.user.username) })
         .catch((error) => { console.log(error) });
 
 
       socket.on('receive_request', (data) => {
+
         console.log('Solicitud recibida de:', data.senderId);
+        setRequest(data);
+        setModalVisible(true);
+        
+
       });
     }
   }, [])
 
-  
+  const acceptRequest = (senderId) => {
+    console.log('Solicitud aceptada de:', senderId);
+    socket.emit('accept_request', { senderId: senderId, receiverId: username });
+    setModalVisible(!modalVisible ); 
+  }
+
+  const styles = StyleSheet.create({
+    centeredView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 22,
+    },
+  });
 
 
   return (
     <View style={tw`flex-1 items-center justify-center bg-[${backgroundColor}]`}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={tw`flex-1 justify-center items-center`}>
+          <View style={tw`bg-slate-400 shadow-2xl rounded-3xl p-10 items-center `}>
+            <Text style={tw`text-2xl font-bold`}>@{request.senderId} </Text>
+            <Text style={tw`text-lg font-semibold`}>Te ha enviado una solicitud</Text>
+            <Text >"{request.message}"</Text>
+            <View style={tw`flex flex-row`}>
+            <TouchableOpacity
+              style={tw`rounded-full bg-red-500 p-2 m-1`}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={tw`text-white font-bold`}> Decline </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={tw`rounded-full bg-green-500 p-2 m-1`}
+              onPress={() => acceptRequest(request.senderId)}
+            >
+              <Text style={tw`text-white font-bold`}> Accept </Text>
+            </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <View>
         <Text style={tw`text-[${textColor}] text-2xl font-bold`}>Bienvenido {userID} </Text>
         <Text style={tw`text-[${textColor}] text-2xl font-bold`}>Salas</Text>
