@@ -153,7 +153,7 @@ app.post('/create-user', async (req, res) => {
 app.get('/getsession', async (req, res) => {
   res.json(req.session);
 });
-
+//-----------------------------------------------------
 app.post('/login', async (req, res) => {
   console.log('Entrando a login');
 
@@ -179,6 +179,27 @@ app.post('/login', async (req, res) => {
     res.status(401).send('Invalid login');
   }
 });
+
+app.post('/refreshSession', async (req, res) => {
+  const { username } = req.body;
+  const user = await Users.findOne({
+    where: {
+      username: username,
+    },
+  });
+   
+  if (user) {
+    user.dataValues.password = undefined; // Remove password from user info
+    user.dataValues.groups = JSON.parse(user.dataValues.groups); // Remove groups from user info
+    user.dataValues.contacts = JSON.parse(user.dataValues.contacts); // Remove contacts from user info
+    req.session.user = user.dataValues; // Store user info in session
+    req.session.save();
+    res.json(req.session);
+  } else {
+    res.status(401).send('Invalid login');
+  } 
+}
+);
 
 app.post('/logout', (req, res) => {
   req.session.destroy((err) => {
