@@ -17,24 +17,38 @@ export default function TabTwoScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const navigation = useNavigation(); // Use the useNavigation hook
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
-  const [contacts, setContacts] = useState([{name: null, profile: emoGirlIcon}]);
+  const [contacts, setContacts] = useState([]);
+  const [username, setUsername] = useState(null);
 
   useEffect(() => {
     if (socket != null) {
-      console.log(socket, 'socket EN CONTACTS');
-      axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
-        // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-        .then((res) => { 
-          console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
-          const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
-            name: contact.username,
-            profile: contact.image ? { uri: contact.image } : emoGirlIcon,
-          })); 
-          setContacts(lastcontacts)   }) 
-        .catch((error) => { console.log(error) });
-    }
+        console.log(socket, 'socket EN CONTACTS');
 
+      axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
+                // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
+      .then((res) => { 
+        setUsername(res.data.user.username);
+          
+        }) 
+      .catch((error) => { console.log(error) });
+
+    }
   },[]);
+
+  useEffect(() => {
+    if(username === null) return;
+    axios.post(`http://localhost:3000/refreshSession`,{username} ,{ withCredentials: true })
+            .then((res) => { 
+                
+              console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
+              const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
+                name: contact.username,
+                profile: contact.image ? { uri: contact.image } : emoGirlIcon,
+                })); 
+              setContacts(lastcontacts)   
+            }) 
+            .catch((error) => { console.log(error) });
+  }, [username]);
 
   useEffect(() => {
     console.log('CONTACTS', contacts);
