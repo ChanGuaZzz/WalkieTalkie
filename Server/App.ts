@@ -216,6 +216,30 @@ app.post('/searchUser', async (req, res) => {
   console.log('server user: ' + usernamesearch);
 
   // Use the Op.like operator to search for usernames that contain the search string
+  const user = await Users.findOne({
+    where: {
+      username: username,
+    },
+  });
+  let contactsofuser=[];
+  let contactsofuserDB;
+
+  if (user && user!==null && user.contacts!==null) {
+
+        contactsofuserDB = JSON.parse(user.contacts);
+    
+        if (typeof contactsofuserDB === 'string') {
+          contactsofuserDB = JSON.parse(contactsofuserDB);
+        }
+
+  }
+
+  contactsofuser = contactsofuserDB.map((contact: any) => contact.username);// se obtienen los nombres de los contactos del usuario
+
+      
+
+
+
   const users = await Users.findAll({
     where: {
       [Op.and]: [
@@ -226,7 +250,7 @@ app.post('/searchUser', async (req, res) => {
         },
         {
           username: {
-            [Op.ne]: username, // This will exclude the username provided
+            [Op.notIn]: [username, ...contactsofuser], // This will exclude the username provided and those in contactsofuser
           },
         },
       ],
