@@ -319,7 +319,8 @@ const savecontacts= (user : any, usernameContact : string, currentRoom:any)=>{//
       contacts = JSON.parse(contacts);
     }
    const contact={username:usernameContact, room:currentRoom}
-    if (!contacts.includes(contact)) {
+    if (!contacts.some((c: any) => c.username === contact.username && c.room === contact.room)) {// se verifica si el contacto ya esta en la lista ##AQUI VOY
+      console.log('contacto incluye?',contacts.includes(contact), 'contacto:', contact, 'contacts:', contacts);
       contacts.push(contact);
       user.setcontacts(contacts);
       user
@@ -442,7 +443,13 @@ io.on('connection', (socket: Socket) => {
     });
       savecontacts(userSender, data.receiverId, currentRoom);
       savecontacts(userReceiver, data.senderId, currentRoom);
-    if(receiverSocket !== undefined){
+    
+      io.to(receiverSocketId).emit('refreshcontacts');// se envia la señal para que se actualicen los contactos en tiempo real
+      io.to(senderSocketId).emit('refreshcontacts');  // se envia la señal para que se actualicen los contactos en tiempo real
+
+
+
+      if(receiverSocket !== undefined){
       // receiverSocket.emit('join', { currentRoom: currentRoom, userID: receiverId, forContacts: true }); // el usuario que acepto la solicitud se une a la sala con el usuario que envio la solicitud
     receiverSocket.join(currentRoom);
     }

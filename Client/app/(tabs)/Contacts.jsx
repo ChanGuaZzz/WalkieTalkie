@@ -28,16 +28,25 @@ export default function TabTwoScreen() {
                 // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
       .then((res) => { 
         setUsername(res.data.user.username);
-          
+        const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
+          name: contact.username,
+          profile: contact.image ? { uri: contact.image } : emoGirlIcon,
+          })); 
+        setContacts(lastcontacts) 
         }) 
       .catch((error) => { console.log(error) });
+
+      
 
     }
   },[]);
 
+
   useEffect(() => {
-    if(username === null) return;
-    axios.post(`http://localhost:3000/refreshSession`,{username} ,{ withCredentials: true })
+    if (username != null) {
+    socket.on('refreshcontacts', () => {
+console.log('REFRESH CONTACTS');
+        axios.post(`http://localhost:3000/refreshSession`,{username} ,{ withCredentials: true })
             .then((res) => { 
                 
               console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
@@ -48,6 +57,10 @@ export default function TabTwoScreen() {
               setContacts(lastcontacts)   
             }) 
             .catch((error) => { console.log(error) });
+        
+
+      });
+    }
   }, [username]);
 
   useEffect(() => {
