@@ -11,6 +11,7 @@ import emoGirlIcon from '../../assets/images/emoGirlIcon.png';
 import { MicProvider } from '../../components/context/MicContext';
 import { useSocket } from '../../components/context/SocketContext';
 import axios from 'axios';
+
  
 
 export default function TabTwoScreen() {
@@ -19,6 +20,8 @@ export default function TabTwoScreen() {
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
   const [contacts, setContacts] = useState([]);
   const [username, setUsername] = useState(null);
+  const textColor = useThemeColor({}, 'text');
+
 
   useEffect(() => {
     if (socket != null) {
@@ -75,9 +78,14 @@ console.log('REFRESH CONTACTS');
         <ChatComponent user={user1} onPress={() => navigation.navigate('ChatRoom', { user: user1 })} icon='mic' />
         <ChatComponent user={user2} onPress={() => navigation.navigate('ChatRoom', { user: user2 })} icon='mic' />
         <ChatComponent user={user3} onPress={() => navigation.navigate('ChatRoom', { user: user3 })} icon='mic' /> */}
-      {contacts.map((contact, index) => (
+      {contacts.length === 0 
+      ? <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No tienes contactos...</Text>
+      :
+       contacts.map((contact, index) => (
         <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
-      ))}
+        ))
+
+      }
       </MicProvider>
 
       {/* Añadir contacto */}
