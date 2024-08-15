@@ -14,7 +14,7 @@ const createSocket = (isLoggedIn, username) => {
     if (isLoggedIn && username && !socketRef.current) { // Solo crear socket si no existe uno
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
         .then((res) => {
-          const newsocket = io(SOCKET_URL, { query: { groups: res.data.user.groups, username: res.data.user.username } });
+          const newsocket = io(SOCKET_URL, { query: { groups: res.data.user.groups, contacts: res.data.user.contacts , username: res.data.user.username } });
           socketRef.current = newsocket; // Guardar la referencia del socket
           setSocket(newsocket);
           console.log('Conectado socket desde createSocket', newsocket);

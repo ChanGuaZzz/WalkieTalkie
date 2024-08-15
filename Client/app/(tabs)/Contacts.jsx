@@ -1,5 +1,5 @@
 //Client/app/(tabs)/Contacts.jsx
-import {React, useState, useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -12,7 +12,7 @@ import { MicProvider } from '../../components/context/MicContext';
 import { useSocket } from '../../components/context/SocketContext';
 import axios from 'axios';
 
- 
+
 
 export default function TabTwoScreen() {
   const backgroundColor = useThemeColor({}, 'background');
@@ -25,42 +25,46 @@ export default function TabTwoScreen() {
 
   useEffect(() => {
     if (socket != null) {
-        console.log(socket, 'socket EN CONTACTS');
+      console.log(socket, 'socket EN CONTACTS');
 
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
-                // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-      .then((res) => { 
-        setUsername(res.data.user.username);
-        const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
-          name: contact.username,
-          profile: contact.image ? { uri: contact.image } : emoGirlIcon,
-          })); 
-        setContacts(lastcontacts) 
-        }) 
-      .catch((error) => { console.log(error) });
+        // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
+        .then((res) => {
+          setUsername(res.data.user.username);
+          const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
+            name: contact.username,
+            room: contact.room,
+            profile: contact.image ? { uri: contact.image } : emoGirlIcon,
+          }));
+          setContacts(lastcontacts)
+        })
+        .catch((error) => { console.log(error) });
 
-      
+
 
     }
-  },[]);
+  }, []);
 
 
   useEffect(() => {
     if (username != null) {
-    socket.on('refreshcontacts', () => {
-console.log('REFRESH CONTACTS');
-        axios.post(`http://localhost:3000/refreshSession`,{username} ,{ withCredentials: true })
-            .then((res) => { 
-                
-              console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
-              const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
-                name: contact.username,
-                profile: contact.image ? { uri: contact.image } : emoGirlIcon,
-                })); 
-              setContacts(lastcontacts)   
-            }) 
-            .catch((error) => { console.log(error) });
-        
+      socket.on('refreshcontacts', () => {
+        console.log('REFRESH CONTACTS');
+        axios.post(`http://localhost:3000/refreshSession`, { username }, { withCredentials: true })
+          .then((res) => {
+
+            console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
+            const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
+              name: contact.username,
+              room: contact.room,
+              profile: contact.image ? { uri: contact.image } : emoGirlIcon,
+            }));
+
+            console.log('LAST CONTACTS', lastcontacts);
+            setContacts(lastcontacts)
+          })
+          .catch((error) => { console.log(error) });
+
 
       });
     }
@@ -68,7 +72,7 @@ console.log('REFRESH CONTACTS');
 
   useEffect(() => {
     console.log('CONTACTS', contacts);
-  } , [contacts]);
+  }, [contacts]);
 
 
   return (
@@ -78,14 +82,14 @@ console.log('REFRESH CONTACTS');
         <ChatComponent user={user1} onPress={() => navigation.navigate('ChatRoom', { user: user1 })} icon='mic' />
         <ChatComponent user={user2} onPress={() => navigation.navigate('ChatRoom', { user: user2 })} icon='mic' />
         <ChatComponent user={user3} onPress={() => navigation.navigate('ChatRoom', { user: user3 })} icon='mic' /> */}
-      {contacts.length === 0 
-      ? <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No tienes contactos...</Text>
-      :
-       contacts.map((contact, index) => (
-        <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
-        ))
+        {contacts.length === 0
+          ? <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No tienes contactos...</Text>
+          :
+          contacts.map((contact, index) => (
+            <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
+          ))
 
-      }
+        }
       </MicProvider>
 
       {/* Añadir contacto */}
