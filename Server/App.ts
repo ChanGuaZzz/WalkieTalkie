@@ -358,23 +358,37 @@ const savecontacts= (user : any, usernameContact : string, currentRoom:any)=>{//
   }}
 io.on('connection', (socket: Socket) => {
   console.log('sockets activoOOOOOOOOOOOOOOOOOOOOOOOOOOs:', io.sockets.sockets.size);
-  let groups = socket.handshake.query.groups as string | undefined;
+  const groups = socket.handshake.query.groups as string | undefined;
   const username = socket.handshake.query.username as string | undefined;
-  let groupsAmI: string[] = [];
-  if (typeof groups === 'string' && groups.trim()) {
-    try {
-      groupsAmI = JSON.parse(groups);
-    } catch (error) {
-      console.error('Error parsing groups:', error);
-      groupsAmI = []; // En caso de error, usa un array vacío
-    }
-  }
-  if (groupsAmI) {
-    groupsAmI.forEach((group) => {
-      socket.join(group);
-      console.log('User joined room:', group);
-    });
-  }
+  const contacts = socket.handshake.query.contacts as string | undefined;
+
+        if (typeof groups === 'string' && groups.trim()) {
+          try {
+            JSON.parse(groups).map((group: any) => {
+              socket.join(group);
+              console.log('User joined group:', group);
+            });
+          } catch (error) {
+            console.error('Error parsing groups:', error);
+          }
+        }
+        if (typeof contacts === 'string' && contacts.trim()) {
+          try {
+
+            JSON.parse(contacts).map((contact: any) => {
+              if (contact.room) {
+                socket.join(contact.room);
+                console.log('User joined room:', contact.room);
+              } else {
+                console.log('No se encontro la sala');
+              } 
+            } );
+          } catch (error) {
+            console.error('Error parsing groups:', error);
+          }
+        }
+
+  
   console.log('User connected:', socket.id);
   if (username) {
     connectedUsers[username] = socket.id;
