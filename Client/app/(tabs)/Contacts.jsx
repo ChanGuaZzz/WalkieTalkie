@@ -8,7 +8,6 @@ import { Ionicons } from '@expo/vector-icons';
 import ChatComponent from '../../components/ChatComponent';
 import UwUIcon from '../../assets/images/adaptive-icon.png';
 import emoGirlIcon from '../../assets/images/emoGirlIcon.png';
-import { MicProvider } from '../../components/context/MicContext';
 import { useSocket } from '../../components/context/SocketContext';
 import axios from 'axios';
 
@@ -69,20 +68,14 @@ export default function TabTwoScreen() {
 
   return (
     <View style={tw`flex-1 items-center  bg-[${backgroundColor}]`}>
-      <MicProvider>
-        {/* ChatComponent
-        <ChatComponent user={user1} onPress={() => navigation.navigate('ChatRoom', { user: user1 })} icon='mic' />
-        <ChatComponent user={user2} onPress={() => navigation.navigate('ChatRoom', { user: user2 })} icon='mic' />
-        <ChatComponent user={user3} onPress={() => navigation.navigate('ChatRoom', { user: user3 })} icon='mic' /> */}
-        {contacts.length === 0
-          ? <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No tienes contactos...</Text>
-          :
-          contacts.map((contact, index) => (
-            <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
-          ))
 
-        }
-      </MicProvider>
+      {contacts.length === 0 ?
+        <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No tienes contactos...</Text>
+        :
+        contacts.map((contact, index) => (
+          <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
+        ))
+      }
 
       {/* Añadir contacto */}
       <TouchableOpacity onPress={() => navigation.navigate('AddContactsScreen')} style={tw`absolute bottom-12 right-5 px-4 py-2 bg-blue-500 rounded-full`}>
