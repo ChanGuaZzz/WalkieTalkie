@@ -5,9 +5,9 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import { Sequelize, DataTypes, Model, Op } from 'sequelize';
 import bcrypt from 'bcrypt';
-import fs from 'fs'; //Borrar
-import { Json } from 'sequelize/types/utils'; //Borrar
-import { Z_DATA_ERROR } from 'zlib'; //Borrar
+import fs from 'fs'; //desinstalar y Borrar
+import { Json } from 'sequelize/types/utils'; //desinstalar y Borrar
+import { Z_DATA_ERROR } from 'zlib'; //desinstalar y Borrar
 
 const app = express();
 const server = createServer(app);
