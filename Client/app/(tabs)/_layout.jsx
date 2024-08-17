@@ -14,12 +14,7 @@ import { SocketProvider } from '../../components/context/SocketContext';
 import io from 'socket.io-client';
 import axios from 'axios';
 import getEnvVars from '../../config';
-
-
-
 const { SOCKET_URL } = getEnvVars();
-
-
 const Tab = createMaterialTopTabNavigator();
 
 export default function TabLayout() {
@@ -42,7 +37,7 @@ export default function TabLayout() {
   // }, []);
   return (
     <>
-    {/* {socket!==null && 
+      {/* {socket!==null && 
      <SocketProvider socket={socket}>  */}
       <Tab.Navigator tabBarPosition='bottom' screenOptions={{
         tabBarStyle: { backgroundColor: SoftbackgroundColor },
@@ -79,7 +74,7 @@ export default function TabLayout() {
           }}
         />
       </Tab.Navigator>
-    {/* </SocketProvider>
+      {/* </SocketProvider>
      } */}
     </>
   );

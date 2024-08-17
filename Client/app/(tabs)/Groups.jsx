@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native'; // Import useNavigatio
 import { Ionicons } from '@expo/vector-icons';
 import { useSocket } from '../../components/context/SocketContext';
 
-
 export default function TabTwoScreen() {
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
@@ -18,7 +17,7 @@ export default function TabTwoScreen() {
     if (socket != null) {
       console.log(socket, 'socket EN Groups');
     }
-  },[]);
+  }, []);
 
   return (
     <View style={tw`flex-1 items-center justify-center bg-[${backgroundColor}]`}>

@@ -22,7 +22,6 @@ export default function TabTwoScreen() {
   const [username, setUsername] = useState(null);
   const textColor = useThemeColor({}, 'text');
 
-
   useEffect(() => {
     if (socket != null) {
       console.log(socket, 'socket EN CONTACTS');
@@ -39,12 +38,8 @@ export default function TabTwoScreen() {
           setContacts(lastcontacts)
         })
         .catch((error) => { console.log(error) });
-
-
-
     }
   }, []);
-
 
   useEffect(() => {
     if (username != null) {
@@ -64,8 +59,6 @@ export default function TabTwoScreen() {
             setContacts(lastcontacts)
           })
           .catch((error) => { console.log(error) });
-
-
       });
     }
   }, [username]);
@@ -73,7 +66,6 @@ export default function TabTwoScreen() {
   useEffect(() => {
     console.log('CONTACTS', contacts);
   }, [contacts]);
-
 
   return (
     <View style={tw`flex-1 items-center  bg-[${backgroundColor}]`}>

@@ -52,37 +52,37 @@ export default function RootLayout() {
   }, [isLoggedIn])
 
   // logout
-const handleLogout = async () => {
-  axios.post(`${SERVER_URL}/logout`)
-    .then((response) => {
-      if (socket) {
-        socket.disconnect();  // Desconectar el socket al desloguear
-        console.log('Socket desconectado en logout');
-        setIsSocketConnected(false);
-      }
-      AsyncStorage.removeItem('isLoggedIn');
-      setIsLoggedIn(false);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+  const handleLogout = async () => {
+    axios.post(`${SERVER_URL}/logout`)
+      .then((response) => {
+        if (socket) {
+          socket.disconnect();  // Desconectar el socket al desloguear
+          console.log('Socket desconectado en logout');
+          setIsSocketConnected(false);
+        }
+        AsyncStorage.removeItem('isLoggedIn');
+        setIsLoggedIn(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
 
 
 
-  const socket = createSocket(isLoggedIn, username) ;
+  const socket = createSocket(isLoggedIn, username);
 
   useEffect(() => {
     if (socket != null) {
       socket.on('connect', () => {
         setIsSocketConnected(true);
         console.log('ESTA CONECTADO');
-    });
+      });
     }
-    
 
-}, [socket]);
+
+  }, [socket]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

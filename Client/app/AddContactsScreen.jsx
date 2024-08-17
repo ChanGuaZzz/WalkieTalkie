@@ -37,7 +37,7 @@ export default function AddContactsScreen() {
 
   const { SERVER_URL } = getEnvVars();
   const onSearchUser = () => {
-    axios.post(`${SERVER_URL}/searchUser`, { usernamesearch: text, username : username })
+    axios.post(`${SERVER_URL}/searchUser`, { usernamesearch: text, username: username })
       .then((res) => {
         console.log(res.data);
         const usersData = res.data.map((user) => ({

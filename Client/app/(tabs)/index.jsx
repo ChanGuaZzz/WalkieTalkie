@@ -1,5 +1,5 @@
 //Client/app/(tabs)/index.jsx
-import { View, Text, Modal,TouchableOpacity,StyleSheet } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import tw from 'twrnc';
 import AudioComponent from '../../components/AudioComponent';
@@ -20,24 +20,18 @@ const Index = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [request, setRequest] = useState([{ senderId: null, receiverId: null, message: null }]);
 
-
-
   useEffect(() => {
     if (socket != null) {
-          console.log(socket, 'socket EN INDEX');
+      console.log(socket, 'socket EN INDEX');
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
         .then((res) => { setUserID(res.data.user.id); setUsername(res.data.user.username) })
         .catch((error) => { console.log(error) });
 
-
       socket.on('receive_request', (data) => {
-
         console.log('Solicitud recibida de:', data.senderId);
         setRequest(data);
         setModalVisible(true);
-        
-
       });
     }
   }, [])
@@ -45,7 +39,7 @@ const Index = () => {
   const acceptRequest = (senderId) => {
     console.log('Solicitud aceptada de:', senderId);
     socket.emit('accept_request', { senderId: senderId, receiverId: username });
-    setModalVisible(!modalVisible ); 
+    setModalVisible(!modalVisible);
   }
 
   const styles = StyleSheet.create({
@@ -56,7 +50,6 @@ const Index = () => {
       marginTop: 22,
     },
   });
-
 
   return (
     <View style={tw`flex-1 items-center justify-center bg-[${backgroundColor}]`}>
@@ -74,18 +67,18 @@ const Index = () => {
             <Text style={tw`text-lg font-semibold`}>Te ha enviado una solicitud</Text>
             <Text >"{request.message}"</Text>
             <View style={tw`flex flex-row`}>
-            <TouchableOpacity
-              style={tw`rounded-full bg-red-500 p-2 m-1`}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={tw`text-white font-bold`}> Decline </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={tw`rounded-full bg-green-500 p-2 m-1`}
-              onPress={() => acceptRequest(request.senderId)}
-            >
-              <Text style={tw`text-white font-bold`}> Accept </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={tw`rounded-full bg-red-500 p-2 m-1`}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <Text style={tw`text-white font-bold`}> Decline </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={tw`rounded-full bg-green-500 p-2 m-1`}
+                onPress={() => acceptRequest(request.senderId)}
+              >
+                <Text style={tw`text-white font-bold`}> Accept </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

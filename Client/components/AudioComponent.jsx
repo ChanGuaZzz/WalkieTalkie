@@ -27,7 +27,7 @@ const AudioComponent = ({ currentRoom, userID }) => {
   }, [currentRoom]);
 
   useEffect(() => {
-    console.log( socket, 'socket EN AUDIOCOMPONENT');
+    console.log(socket, 'socket EN AUDIOCOMPONENT');
   }, []);
 
   // useEffect(() => {
@@ -70,7 +70,7 @@ const AudioComponent = ({ currentRoom, userID }) => {
 
   useEffect(() => {
     if (!currentRoom) return;
-    socket.emit('join', { currentRoom: currentRoom, userID: userID,});
+    socket.emit('join', { currentRoom: currentRoom, userID: userID, });
     console.log('user ', userID, ' Joined room ', currentRoom);
   }, [currentRoom]);
 
