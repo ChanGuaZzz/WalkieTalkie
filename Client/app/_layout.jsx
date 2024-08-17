@@ -16,7 +16,6 @@ import io, { Socket } from 'socket.io-client';
 import { SocketProvider } from '../components/context/SocketContext';
 import createSocket from '../components/context/CreateSocket';
 
-
 export default function RootLayout() {
   const [modalIconVisible, setModalIconVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false) //cambialo para probar el login
@@ -67,10 +66,6 @@ export default function RootLayout() {
         console.log(error);
       });
   };
-
-
-
-
   const socket = createSocket(isLoggedIn, username);
 
   useEffect(() => {
@@ -80,7 +75,6 @@ export default function RootLayout() {
         console.log('ESTA CONECTADO');
       });
     }
-
 
   }, [socket]);
 
