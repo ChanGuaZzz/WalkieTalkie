@@ -5,7 +5,6 @@ import tw from "twrnc";
 import { useThemeColor } from "../hooks/useThemeColor";
 import axios from "axios";
 import ChatComponent from "../components/ChatComponent";
-import { MicProvider } from "../components/context/MicContext";
 import emoGirlIcon from "../assets/images/emoGirlIcon.png";
 import getEnvVars from "../config";
 import { useSocket } from '../components/context/SocketContext';
@@ -26,7 +25,6 @@ export default function AddContactsScreen() {
       profile: emoGirlIcon,
     },
   ]);
-
 
   useEffect(() => {
     axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
@@ -73,8 +71,6 @@ export default function AddContactsScreen() {
 
       console.log('Solicitud enviada a:', receiverId);
     }
-
-
   };
 
   return (
@@ -114,13 +110,11 @@ export default function AddContactsScreen() {
       <View style={tw`flex-1 items-center`}>
         {userFound &&
           users.map((user, index) => (
-            <MicProvider key={index}>
-              <ChatComponent
-                user={user}
-                onAdd={() => { addUser(username, user.name); }}
-                icon="+"
-              />
-            </MicProvider>
+            <ChatComponent
+              user={user}
+              onAdd={() => { addUser(username, user.name); }}
+              icon="+"
+            />
           ))}
         {userFound == false && (
           <Text style={tw`text-[${textColor}]`}>
