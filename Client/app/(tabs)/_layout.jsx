@@ -20,28 +20,13 @@ const Tab = createMaterialTopTabNavigator();
 export default function TabLayout() {
   const SoftbackgroundColor = useThemeColor({}, 'Softbackground');
   const textColor = useThemeColor({}, 'text');
-  // const [socket, setSocket] = useState(null); // Estado para manejar la instancia del socket
 
-  // useEffect(() => {
-  //     let newsocket;
-  //     axios.get(`http://localhost:3000/getsession`,{ withCredentials: true })
-  //     .then((res) => {
-  //       console.log("SESSIONES",res.data);
-  //       newsocket=io(SOCKET_URL,{ query : { groups: res.data.user.groups }}); 
-  //       setSocket(newsocket);
-  //        })
-  //     .catch((error) => {console.log(error)});
-
-  //     return () => { 
-  //     };
-  // }, []);
   return (
     <>
-      {/* {socket!==null && 
-     <SocketProvider socket={socket}>  */}
-      <Tab.Navigator tabBarPosition='bottom' screenOptions={{
-        tabBarStyle: { backgroundColor: SoftbackgroundColor },
-      }}
+      <Tab.Navigator tabBarPosition='bottom'
+        screenOptions={{
+          tabBarStyle: { backgroundColor: SoftbackgroundColor },
+        }}
       >
         <Tab.Screen name="Recents" component={RecentsScreen}
           options={{
@@ -74,8 +59,6 @@ export default function TabLayout() {
           }}
         />
       </Tab.Navigator>
-      {/* </SocketProvider>
-     } */}
     </>
   );
 }
