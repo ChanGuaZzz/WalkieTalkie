@@ -5,9 +5,9 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import { Sequelize, DataTypes, Model, Op } from 'sequelize';
 import bcrypt from 'bcrypt';
-import fs from 'fs';//Borrar
-import { Json } from 'sequelize/types/utils';//Borrar
-import { Z_DATA_ERROR } from 'zlib';//Borrar
+import fs from 'fs'; //Borrar
+import { Json } from 'sequelize/types/utils'; //Borrar
+import { Z_DATA_ERROR } from 'zlib'; //Borrar
 
 const app = express();
 const server = createServer(app);
@@ -187,7 +187,7 @@ app.post('/refreshSession', async (req, res) => {
       username: username,
     },
   });
-   
+
   if (user) {
     user.dataValues.password = undefined; // Remove password from user info
     user.dataValues.groups = JSON.parse(user.dataValues.groups); // Remove groups from user info
@@ -197,9 +197,8 @@ app.post('/refreshSession', async (req, res) => {
     res.json(req.session);
   } else {
     res.status(401).send('Invalid login');
-  } 
-}
-);
+  }
+});
 
 app.post('/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -221,24 +220,18 @@ app.post('/searchUser', async (req, res) => {
       username: username,
     },
   });
-  let contactsofuser=[];
+  let contactsofuser = [];
   let contactsofuserDB;
 
-  if (user && user!==null && user.contacts!==null) {
+  if (user && user !== null && user.contacts !== null) {
+    contactsofuserDB = JSON.parse(user.contacts);
 
-        contactsofuserDB = JSON.parse(user.contacts);
-    
-        if (typeof contactsofuserDB === 'string') {
-          contactsofuserDB = JSON.parse(contactsofuserDB);
-        }
-
+    if (typeof contactsofuserDB === 'string') {
+      contactsofuserDB = JSON.parse(contactsofuserDB);
+    }
   }
 
-  contactsofuser = contactsofuserDB.map((contact: any) => contact.username);// se obtienen los nombres de los contactos del usuario
-
-      
-
-
+  contactsofuser = contactsofuserDB.map((contact: any) => contact.username); // se obtienen los nombres de los contactos del usuario
 
   const users = await Users.findAll({
     where: {
@@ -335,60 +328,66 @@ app.post('/searchUser', async (req, res) => {
 // );
 
 const connectedUsers: { [key: string]: string } = {};
-const savecontacts= (user : any, usernameContact : string, currentRoom:any)=>{// funcion para guardar los contactos en la base de datos
+const savecontacts = (user: any, usernameContact: string, currentRoom: any) => {
+  // funcion para guardar los contactos en la base de datos
   if (user && user.contacts) {
     let contacts = JSON.parse(user.contacts);
 
     if (typeof contacts === 'string') {
       contacts = JSON.parse(contacts);
     }
-   const contact={username:usernameContact, room:currentRoom}
-    if (!contacts.some((c: any) => c.username === contact.username && c.room === contact.room)) {// se verifica si el contacto ya esta en la lista ##AQUI VOY
-      console.log('contacto incluye?',contacts.includes(contact), 'contacto:', contact, 'contacts:', contacts);
+    const contact = { username: usernameContact, room: currentRoom };
+    if (!contacts.some((c: any) => c.username === contact.username && c.room === contact.room)) {
+      // se verifica si el contacto ya esta en la lista ##AQUI VOY
+      console.log(
+        'contacto incluye?',
+        contacts.includes(contact),
+        'contacto:',
+        contact,
+        'contacts:',
+        contacts
+      );
       contacts.push(contact);
       user.setcontacts(contacts);
-      user
-        .save()
-        .then(() => {
-          console.log('Los cambios han sido guardados exitosamente.');
-        })
+      user.save().then(() => {
+        console.log('Los cambios han sido guardados exitosamente.');
+      });
     } else {
       console.log('Ya esta en con el contacto');
     }
-  }}
+  }
+};
 io.on('connection', (socket: Socket) => {
   console.log('sockets activoOOOOOOOOOOOOOOOOOOOOOOOOOOs:', io.sockets.sockets.size);
   const groups = socket.handshake.query.groups as string | undefined;
   const username = socket.handshake.query.username as string | undefined;
   const contacts = socket.handshake.query.contacts as string | undefined;
 
-        if (typeof groups === 'string' && groups.trim()) {
-          try {
-            JSON.parse(groups).map((group: any) => {
-              socket.join(group);
-              console.log('User joined group:', group);
-            });
-          } catch (error) {
-            console.error('Error parsing groups:', error);
-          }
+  if (typeof groups === 'string' && groups.trim()) {
+    try {
+      JSON.parse(groups).map((group: any) => {
+        socket.join(group);
+        console.log('User joined group:', group);
+      });
+    } catch (error) {
+      console.error('Error parsing groups:', error);
+    }
+  }
+  if (typeof contacts === 'string' && contacts.trim()) {
+    try {
+      JSON.parse(contacts).map((contact: any) => {
+        if (contact.room) {
+          socket.join(contact.room);
+          console.log('User joined room:', contact.room);
+        } else {
+          console.log('No se encontro la sala');
         }
-        if (typeof contacts === 'string' && contacts.trim()) {
-          try {
+      });
+    } catch (error) {
+      console.error('Error parsing groups:', error);
+    }
+  }
 
-            JSON.parse(contacts).map((contact: any) => {
-              if (contact.room) {
-                socket.join(contact.room);
-                console.log('User joined room:', contact.room);
-              } else {
-                console.log('No se encontro la sala');
-              } 
-            } );
-          } catch (error) {
-            console.error('Error parsing groups:', error);
-          }
-        }
-
-  
   console.log('User connected:', socket.id);
   if (username) {
     connectedUsers[username] = socket.id;
@@ -396,9 +395,8 @@ io.on('connection', (socket: Socket) => {
     console.log('Usuarios conectadossssssssssssssss:', connectedUsers);
   }
 
-
   // =================================================================
-  // *Socket send request* 
+  // *Socket send request*
   // =================================================================
   socket.on('send_request', (data: { senderId: string; receiverId: string }) => {
     const { senderId, receiverId } = data;
@@ -412,10 +410,10 @@ io.on('connection', (socket: Socket) => {
   // ======================*END Socket send request*===================
 
   // =================================================================
-  // *Socket Join room* 
+  // *Socket Join room*
   // =================================================================
   socket.on('join', async (data) => {
-    const currentRoom = data.currentRoom // Nombre de la sala a la que se une
+    const currentRoom = data.currentRoom; // Nombre de la sala a la que se une
     socket.join(currentRoom);
     console.log('salas', socket.rooms);
     console.log('Entra a una sala');
@@ -426,27 +424,27 @@ io.on('connection', (socket: Socket) => {
         id: data.userID,
       },
     });
-        if (user && user.groups) {
-          let groups = JSON.parse(user.groups);
+    if (user && user.groups) {
+      let groups = JSON.parse(user.groups);
 
-          if (typeof groups === 'string') {
-            groups = JSON.parse(groups);
-          }
-          if (!groups.includes(currentRoom)) {
-            groups.push(currentRoom);
-            user.setgroups(groups);
-            user
-              .save()
-              .then(() => {
-                console.log('Los cambios han sido guardados exitosamente.');
-              })
-              .catch((error) => {
-                console.error('Error al guardar los cambios: ', error);
-              });
-          } else {
-            console.log('Ya esta en el grupo');
-          }
-        }
+      if (typeof groups === 'string') {
+        groups = JSON.parse(groups);
+      }
+      if (!groups.includes(currentRoom)) {
+        groups.push(currentRoom);
+        user.setgroups(groups);
+        user
+          .save()
+          .then(() => {
+            console.log('Los cambios han sido guardados exitosamente.');
+          })
+          .catch((error) => {
+            console.error('Error al guardar los cambios: ', error);
+          });
+      } else {
+        console.log('Ya esta en el grupo');
+      }
+    }
     socket
       .to(currentRoom)
       .emit('notification', `${user ? user.username : 'null'} has entered the room.`);
@@ -455,17 +453,16 @@ io.on('connection', (socket: Socket) => {
   // ======================*END Socket JOIN*===================
 
   // =================================================================
-  // *Socket Accept Request* 
+  // *Socket Accept Request*
   // =================================================================
-  
 
   socket.on('accept_request', async (data: { senderId: string; receiverId: string }) => {
     const { senderId, receiverId } = data;
     const senderSocketId = connectedUsers[senderId];
     const receiverSocketId = connectedUsers[receiverId];
     const currentRoom = `${senderId}-${receiverId}`;
-    const senderSocket= io.sockets.sockets.get(senderSocketId);
-    const receiverSocket= io.sockets.sockets.get(receiverSocketId);
+    const senderSocket = io.sockets.sockets.get(senderSocketId);
+    const receiverSocket = io.sockets.sockets.get(receiverSocketId);
     console.log('Entra a ACCEPT REQUEST');
 
     const userSender = await Users.findOne({
@@ -474,39 +471,33 @@ io.on('connection', (socket: Socket) => {
       },
     });
 
-    const userReceiver = await Users.findOne({ 
+    const userReceiver = await Users.findOne({
       where: {
         username: data.receiverId,
       },
     });
-      savecontacts(userSender, data.receiverId, currentRoom);
-      savecontacts(userReceiver, data.senderId, currentRoom);
-    
-      io.to(receiverSocketId).emit('refreshcontacts');// se envia la señal para que se actualicen los contactos en tiempo real
-      io.to(senderSocketId).emit('refreshcontacts');  // se envia la señal para que se actualicen los contactos en tiempo real
+    savecontacts(userSender, data.receiverId, currentRoom);
+    savecontacts(userReceiver, data.senderId, currentRoom);
 
+    io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
+    io.to(senderSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
 
-
-      if(receiverSocket !== undefined){
+    if (receiverSocket !== undefined) {
       // receiverSocket.emit('join', { currentRoom: currentRoom, userID: receiverId, forContacts: true }); // el usuario que acepto la solicitud se une a la sala con el usuario que envio la solicitud
-    receiverSocket.join(currentRoom);
+      receiverSocket.join(currentRoom);
     }
     if (senderSocketId && senderSocket !== undefined) {
       // senderSocket.emit('join', { currentRoom: currentRoom, userID: senderId, forContacts: true }); // el usuario que envio la solicitud se une a la sala con el usuario que acepto la solicitud
       senderSocket.join(currentRoom);
     }
-  console.log(`Solicitud aceptada de ${receiverId} a ${senderId}`);
-
-  }
- 
-);
+    console.log(`Solicitud aceptada de ${receiverId} a ${senderId}`);
+  });
   // ======================*END Socket accept request*===================
 
-  
   // =================================================================
-  // *Socket send audio* 
+  // *Socket send audio*
   // =================================================================
-  
+
   socket.on('send-audio', (audioData, room) => {
     // Emitir el audio recibido a todos los demás clientes conectados
     socket.to(room).emit('receive-audio', audioData, room);
@@ -525,8 +516,7 @@ io.on('connection', (socket: Socket) => {
   });
 });
 
-  // ======================*END Socket send audio*===================
-
+// ======================*END Socket send audio*===================
 
 // socket.on('leaveAllRooms', (username) => {
 //   const rooms = socket.rooms; // O cualquier otra lógica para identificar al usuario
@@ -546,15 +536,15 @@ io.on('connection', (socket: Socket) => {
 // });
 
 // =================================================================
-// *Solicitudes de amistad* 
+// *Solicitudes de amistad*
 // =================================================================
 
 //==== fin solicitudes de amistad ===================================
-  sequelize.sync({ alter: true }).then(() => {
-    app.listen(3000, () => {
-      console.log('Express Server running on port 3000');
-    });
-    server.listen(3001, () => {
-      console.log('Socket.io Server running on port 3001');
-    });
+sequelize.sync({ alter: true }).then(() => {
+  app.listen(3000, () => {
+    console.log('Express Server running on port 3000');
   });
+  server.listen(3001, () => {
+    console.log('Socket.io Server running on port 3001');
+  });
+});
