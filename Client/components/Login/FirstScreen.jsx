@@ -16,7 +16,7 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
   };
 
   return (
-    <View style={tw`flex-1 w-full items-center justify-center bg-red-500`}>
+    <View style={tw`flex-1 w-full items-center justify-center bg-red-600`}>
       <Text style={tw`text-2xl text-{[${textColor}]}`}>First Screen</Text>
       <TouchableOpacity style={tw`bg-blue-500 p-2 mt-5`} onPress={() => GoLoginScreen(false)}>
         <Text style={tw`text-white`}>Login</Text>
