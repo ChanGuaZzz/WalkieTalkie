@@ -111,6 +111,7 @@ export default function AddContactsScreen() {
         {userFound &&
           users.map((user, index) => (
             <ChatComponent
+              key={user.id || index} // Ensure each child has a unique key
               user={user}
               onAdd={() => { addUser(username, user.name); }}
               icon="+"
