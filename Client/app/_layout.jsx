@@ -12,7 +12,6 @@ import UserProfileModal from '../components/modals/UserProfileModal';
 import getEnvVars from '../config';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import io, { Socket } from 'socket.io-client';
 import { SocketProvider } from '../components/context/SocketContext';
 import createSocket from '../components/context/CreateSocket';
 
@@ -82,94 +81,94 @@ export default function RootLayout() {
         {console.log("comprobarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr logeado: ", isLoggedIn, socket)}
         {/* Alvaro comenta la linea de abajo u.u */}
         {isLoggedIn && isSocketConnected ? (
-        <SocketProvider socket={socket}>
-          <Stack screenOptions={{ animation: 'slide_from_right', }} >
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerLeft: () => (
-                  <View style={tw`flex-row items-center `}>
-                    <Image source={ProfileIcon} style={tw`w-8 h-8 mr-2`} />
-                    <Text style={tw`text-base font-semibold text-[${textColor}]`}>{username} </Text>
-                  </View>
-                ),
-                headerRight: () => (
-                  <ConfigIcon handleLogout={handleLogout} />
-                ),
-                headerTitle: '',
-                headerTitleAlign: 'center',
-                headerStyle: tw`bg-[${SoftbackgroundColor}]`,
-              }}
-            />
-            <Stack.Screen
-              name="AddContactsScreen"
-              options={{
-                headerStyle: {
-                  backgroundColor: SoftbackgroundColor, // Dark background color for the header
-                },
-                headerTintColor: textColor,
-                headerTitle: 'Add Contacts',
-              }}
-            />
-            <Stack.Screen
-              name="AddGroupsScreen"
-              options={{
-                headerStyle: {
-                  backgroundColor: SoftbackgroundColor, // Dark background color for the header
-                },
-                headerTintColor: textColor,
-                headerTitle: 'Add Groups',
-              }}
-            />
-            <Stack.Screen
-              name="ChatRoom"
-              options={({ route }) => {
-                const user = route.params.user; // Correctly access the user object from route params
-                return {
+          <SocketProvider socket={socket}>
+            <Stack screenOptions={{ animation: 'slide_from_right', }} >
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerLeft: () => (
+                    <View style={tw`flex-row items-center `}>
+                      <Image source={ProfileIcon} style={tw`w-8 h-8 mr-2`} />
+                      <Text style={tw`text-base font-semibold text-[${textColor}]`}>{username} </Text>
+                    </View>
+                  ),
+                  headerRight: () => (
+                    <ConfigIcon handleLogout={handleLogout} />
+                  ),
+                  headerTitle: '',
+                  headerTitleAlign: 'center',
+                  headerStyle: tw`bg-[${SoftbackgroundColor}]`,
+                }}
+              />
+              <Stack.Screen
+                name="AddContactsScreen"
+                options={{
                   headerStyle: {
-                    backgroundColor: SoftbackgroundColor,
+                    backgroundColor: SoftbackgroundColor, // Dark background color for the header
                   },
                   headerTintColor: textColor,
-                  headerTitle: () => (
-                    <TouchableOpacity onPress={() => setModalIconVisible(true)} style={tw`w-full`}>
-                      <View style={tw`flex-1 flex-row justify-start items-center w-full`}>
-                        <UserProfileModal
-                          user={user}
-                          modalIconVisible={modalIconVisible}
-                          setModalIconVisible={setModalIconVisible}
-                          iconSize={12}
-                        />
-                        <Text style={tw`text-[${textColor}] font-bold text-lg ml-3`}>
-                          {user.name || 'Chat Room'}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ),
-                  headerLeft: () => (
-                    <View style={{ marginLeft: -50 }} />
-                  ),
-                };
-              }}
-            />
-            <Stack.Screen
-              name="ProfileSettings"
-              options={{
-                headerStyle: {
-                  backgroundColor: SoftbackgroundColor, // Dark background color for the header
-                },
-                headerTintColor: textColor,
-                headerTitle: 'Settings',
-              }}
-            />
-          </Stack >
-        </SocketProvider>
+                  headerTitle: 'Add Contacts',
+                }}
+              />
+              <Stack.Screen
+                name="AddGroupsScreen"
+                options={{
+                  headerStyle: {
+                    backgroundColor: SoftbackgroundColor, // Dark background color for the header
+                  },
+                  headerTintColor: textColor,
+                  headerTitle: 'Add Groups',
+                }}
+              />
+              <Stack.Screen
+                name="ChatRoom"
+                options={({ route }) => {
+                  const user = route.params.user; // Correctly access the user object from route params
+                  return {
+                    headerStyle: {
+                      backgroundColor: SoftbackgroundColor,
+                    },
+                    headerTintColor: textColor,
+                    headerTitle: () => (
+                      <TouchableOpacity onPress={() => setModalIconVisible(true)} style={tw`w-full`}>
+                        <View style={tw`flex-1 flex-row justify-start items-center w-full`}>
+                          <UserProfileModal
+                            user={user}
+                            modalIconVisible={modalIconVisible}
+                            setModalIconVisible={setModalIconVisible}
+                            iconSize={12}
+                          />
+                          <Text style={tw`text-[${textColor}] font-bold text-lg ml-3`}>
+                            {user.name || 'Chat Room'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ),
+                    headerLeft: () => (
+                      <View style={{ marginLeft: -50 }} />
+                    ),
+                  };
+                }}
+              />
+              <Stack.Screen
+                name="ProfileSettings"
+                options={{
+                  headerStyle: {
+                    backgroundColor: SoftbackgroundColor, // Dark background color for the header
+                  },
+                  headerTintColor: textColor,
+                  headerTitle: 'Settings',
+                }}
+              />
+            </Stack >
+          </SocketProvider>
 
         ) : (
-        //If not logged in, show the LoginScreen without navigation
-        <MainLogin SetLayoutLogged={SetLayoutLogged} />
-        )} 
+          //If not logged in, show the LoginScreen without navigation
+          <MainLogin SetLayoutLogged={SetLayoutLogged} />
+        )}
 
-        {/* Alvaro comentam PRIMERO arriba del todo, después desde el ) hasta aqui  */}
+        {/* Alvaro comentam PRIMERO arriba del todo, después desde el ' ) ' hasta aqui  */}
 
       </SafeAreaView>
     </GestureHandlerRootView>

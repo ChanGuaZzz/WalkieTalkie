@@ -4,7 +4,6 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "mysql2": "^3.10.3",
     "sequelize": "^6.37.3",

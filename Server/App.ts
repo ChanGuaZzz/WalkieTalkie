@@ -5,9 +5,6 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import { Sequelize, DataTypes, Model, Op } from 'sequelize';
 import bcrypt from 'bcrypt';
-import fs from 'fs'; //desinstalar y Borrar
-import { Json } from 'sequelize/types/utils'; //desinstalar y Borrar
-import { Z_DATA_ERROR } from 'zlib'; //desinstalar y Borrar
 
 const app = express();
 const server = createServer(app);
@@ -57,6 +54,7 @@ class Users extends Model {
   declare password: string;
   declare groups: string;
   declare contacts: string;
+  declare profilePicture: string;
 
   // Method to set the password, hashes password and sets the password
   setPassword(password: string): void {
@@ -119,6 +117,10 @@ Users.init(
       type: DataTypes.JSON,
       allowNull: true,
       defaultValue: [],
+    },
+    profilePicture: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -260,72 +262,6 @@ app.post('/searchUser', async (req, res) => {
 // =================================================================
 // * Messages and socket.io*
 // =================================================================
-// class Messages extends Model {
-//   declare id: number;
-//   declare sender_id: number;
-//   declare receiver_id: number;
-//   declare content: string;
-//   declare timestamp: Date;
-//   declare room: string;
-
-//   toString(): string {
-//     return `<Messages ${this.id}>`;
-//   }
-
-//   serialize(): object {
-//     return {
-//       id: this.id,
-//       sender_id: this.sender_id,
-//       receiver_id: this.receiver_id,
-//       content: this.content,
-//       timestamp: this.timestamp.toISOString(),
-//       room: this.room,
-//     };
-//   }
-// }
-
-// Messages.init(
-//   {
-//     id: {
-//       type: DataTypes.INTEGER,
-//       primaryKey: true,
-//       autoIncrement: true,
-//     },
-//     sender_id: {
-//       type: DataTypes.INTEGER,
-//       allowNull: false,
-//       references: {
-//         model: 'Users', // This is a reference to another model
-//         key: 'id', // This is the column name of the referenced model
-//       },
-//     },
-//     receiver_id: {
-//       type: DataTypes.INTEGER,
-//       allowNull: true,
-//       references: {
-//         model: 'Users',
-//         key: 'id',
-//       },
-//     },
-//     content: {
-//       type: DataTypes.TEXT,
-//       allowNull: false,
-//     },
-//     timestamp: {
-//       type: DataTypes.DATE,
-//       defaultValue: DataTypes.NOW,
-//     },
-//     room: {
-//       type: DataTypes.STRING(100),
-//       defaultValue: '0',
-//     },
-//   },
-//   {
-//     sequelize, // This is the sequelize instance
-//     modelName: 'Messages',
-//     timestamps: false,
-//   }
-// );
 
 const connectedUsers: { [key: string]: string } = {};
 const savecontacts = (user: any, usernameContact: string, currentRoom: any) => {
