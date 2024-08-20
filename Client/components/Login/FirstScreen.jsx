@@ -31,8 +31,99 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     transform: [{ translateX }],
   };
 
-  const [hoverLogin, setHoverLogin] = useState(false);
-  const [hoverRegister, setHoverRegister] = useState(false);
+  // Estados animados para los botones de Login y Register
+  const animatedValueLogin = useRef(new Animated.Value(1)).current;
+  const animatedValueRegister = useRef(new Animated.Value(1)).current;
+
+  const backgroundOpacityLogin = useRef(new Animated.Value(0)).current;
+  const backgroundOpacityRegister = useRef(new Animated.Value(0)).current;
+
+  const borderOpacityLogin = useRef(new Animated.Value(0)).current;
+  const borderOpacityRegister = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = (button) => {
+    const animatedValue = button === 'login' ? animatedValueLogin : animatedValueRegister;
+    const backgroundOpacity = button === 'login' ? backgroundOpacityLogin : backgroundOpacityRegister;
+    const borderOpacity = button === 'login' ? borderOpacityLogin : borderOpacityRegister;
+
+    Animated.timing(animatedValue, {
+      toValue: 0.95,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(backgroundOpacity, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(borderOpacity, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = (button) => {
+    const animatedValue = button === 'login' ? animatedValueLogin : animatedValueRegister;
+    const backgroundOpacity = button === 'login' ? backgroundOpacityLogin : backgroundOpacityRegister;
+    const borderOpacity = button === 'login' ? borderOpacityLogin : borderOpacityRegister;
+
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(backgroundOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(borderOpacity, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const animatedButtonStyleLogin = {
+    transform: [{ scale: animatedValueLogin }],
+  };
+
+  const animatedButtonStyleRegister = {
+    transform: [{ scale: animatedValueRegister }],
+  };
+
+  const animatedBackgroundStyleLogin = {
+    backgroundColor: backgroundOpacityLogin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(250, 250, 250, 0)', 'rgba(250, 250, 250, 0.3)'],
+    }),
+  };
+
+  const animatedBackgroundStyleRegister = {
+    backgroundColor: backgroundOpacityRegister.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(250, 250, 250, 0)', 'rgba(250, 250, 250, 0.3)'],
+    }),
+  };
+
+  const animatedBorderStyleLogin = {
+    borderColor: borderOpacityLogin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(250, 250, 250, 0)', 'rgba(250, 250, 250, 0.3)'],
+    }),
+  };
+
+  const animatedBorderStyleRegister = {
+    borderColor: borderOpacityRegister.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(250, 250, 250, 0)', 'rgba(250, 250, 250, 0.3)'],
+    }),
+  };
 
   return (
     <ImageBackground 
@@ -41,31 +132,39 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     >
       <View style={styles.overlay} />
       <View style={styles.content}>
-        <Text style={[tw`text-2xl`, { color: textColor }, styles.letra]}>Welcome</Text>
-        <Pressable
-          style={({ pressed }) => [
-            tw`w-30 p-3 mt-5`,
-            styles.btn,
-            (pressed || hoverLogin) && styles.btnHover,
-          ]}
-          onPress={() => GoLoginScreen(false)}
-          onMouseEnter={() => setHoverLogin(true)}
-          onMouseLeave={() => setHoverLogin(false)}
-        >
-          <Text style={[tw`text-white`, styles.btnText]}>Login</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [
-            tw`w-30 p-3 mt-5`,
-            styles.btn,
-            (pressed || hoverRegister) && styles.btnHover,
-          ]}
-          onPress={() => GoLoginScreen(true)}
-          onMouseEnter={() => setHoverRegister(true)}
-          onMouseLeave={() => setHoverRegister(false)}
-        >
-          <Text style={[tw`text-white`, styles.btnText]}>Register</Text>
-        </Pressable>
+        <Text style={[tw`text-2xl`, { color: textColor }, styles.letra]}>WalkieTalkie</Text>
+        <Animated.View style={animatedButtonStyleLogin}>
+          <Pressable
+            style={({ pressed }) => [
+              tw`w-30 p-3 mt-5`,
+              styles.btn,
+              pressed && styles.btnPressed,
+            ]}
+            onPress={() => GoLoginScreen(false)}
+            onPressIn={() => handlePressIn('login')}
+            onPressOut={() => handlePressOut('login')}
+          >
+            <Animated.View style={[styles.btnBackground, animatedBackgroundStyleLogin]} />
+            <Text style={[tw`text-white`, styles.btnText]}>Login</Text>
+            <Animated.View style={[styles.underline, animatedBorderStyleLogin]} />
+          </Pressable>
+        </Animated.View>
+        <Animated.View style={animatedButtonStyleRegister}>
+          <Pressable
+            style={({ pressed }) => [
+              tw`w-30 p-3 mt-5`,
+              styles.btn,
+              pressed && styles.btnPressed,
+            ]}
+            onPress={() => GoLoginScreen(true)}
+            onPressIn={() => handlePressIn('register')}
+            onPressOut={() => handlePressOut('register')}
+          >
+            <Animated.View style={[styles.btnBackground, animatedBackgroundStyleRegister]} />
+            <Text style={[tw`text-white`, styles.btnText]}>Register</Text>
+            <Animated.View style={[styles.underline, animatedBorderStyleRegister]} />
+          </Pressable>
+        </Animated.View>
       </View>
       <View style={styles.fogContainer}>
         <Animated.View style={[styles.fogRow, animatedStyle]}>
@@ -93,33 +192,42 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
 
 const styles = StyleSheet.create({
   btn: {
-    borderWidth: 0,
-    borderColor: 'transparent',
-    shadowColor: 'rgba(255, 255, 255, 0)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 20,
-    justifyContent: 'center', // Centra el contenido verticalmente
-    alignItems: 'center', // Centra el contenido horizontalmente
-    borderRadius: 10, // Borde redondeado
-    transition: 'all 0.3s ease', // Transición suave
+    position: 'relative',
+    paddingVertical: 24,
+    paddingHorizontal: 64,
+    borderRadius: 1000,
+    backgroundColor: 'transparent',
+    fontFamily: 'Playfair Display, serif',
+    color: '#fafafa',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  btnHover: {
-    borderWidth: 1,
-    borderColor: '#fff',
-    shadowColor: 'rgba(255, 255, 255, 0.5)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    outlineOffset: 15,
-    outlineColor: 'rgba(255, 255, 255, 0)',
-    textShadow: '1px 1px 2px #427388',
-    borderRadius: 10, // Asegura que el borde redondeado se aplique también en el hover
-    backgroundColor: 'black',
-    color: 'black',
+  btnPressed: {
+    transform: [{ translateY: -4 }],
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   btnText: {
     fontSize: 18, // Tamaño de letra aumentado
+    textAlign: 'center',
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  btnBackground: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 1000,
+  },
+  underline: {
+    position: 'absolute',
+    bottom: 0,
+    left: '50%',
+    height: 2,
+    backgroundColor: 'white',
   },
   imagen: {
     flex: 1,
