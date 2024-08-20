@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, Pressable, ImageBackground, StyleSheet, Animated, Easing } from 'react-native';
 import tw from 'twrnc';
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -125,6 +125,72 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     }),
   };
 
+  // Animaciones de glitch
+  const glitchAnim1 = useRef(new Animated.Value(0)).current;
+  const glitchAnim2 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glitchAnim1, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glitchAnim1, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glitchAnim2, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glitchAnim2, {
+          toValue: 0,
+          duration: 3000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [glitchAnim1, glitchAnim2]);
+
+  const glitchStyle1 = {
+    transform: [
+      {
+        translateX: glitchAnim1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 2],
+        }),
+      },
+    ],
+   
+
+    color: 'white',
+    textShadowColor: 'black',
+    textShadowOffset: { width: 0, height: 0 },
+  };
+
+  const glitchStyle2 = {
+    transform: [
+      {
+        translateX: glitchAnim2.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -2],
+        }),
+      },
+    ],
+    textShadowColor: 'white',
+    textShadowOffset: { width: 1, height: 0 },
+    textShadowRadius: 1,
+  };
+
   return (
     <ImageBackground 
       source={require('../../assets/images/Fondo-Bosque.jpg')}
@@ -132,7 +198,13 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     >
       <View style={styles.overlay} />
       <View style={styles.content}>
-        <Text style={[tw`text-2xl`, { color: textColor }, styles.letra]}>WalkieTalkie</Text>
+        <Text style={[tw`text-2xl`, { color: textColor }, styles.letra]}></Text>
+        <Animated.Text style={[styles.glitch, glitchStyle1]} data-text="WalkieTalkie">
+          WalkieTalkie
+        </Animated.Text>
+        <Animated.Text style={[styles.glitch, glitchStyle2]} data-text="WalkieTalkie">
+          WalkieTalkie
+        </Animated.Text>
         <Animated.View style={animatedButtonStyleLogin}>
           <Pressable
             style={({ pressed }) => [
@@ -262,7 +334,18 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   letra: {
-    // Puedes agregar estilos adicionales aquí si es necesario
+    fontFamily: 'Varela, sans-serif',
+  },
+  glitch: {
+    color: 'white',
+    
+    textShadowRadius: 10,
+    fontSize: 65,
+    position: 'absolute',
+    bottom: 200,
+    width: 400,
+    margin: 0,
+    textAlign: 'center',
   },
 });
 
