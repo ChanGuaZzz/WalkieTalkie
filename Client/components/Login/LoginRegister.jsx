@@ -16,6 +16,7 @@ const LoginRegister = ({ LoginScreen }) => {
   const textColor = useThemeColor({}, 'text');
   const [badLogin, setBadLogin] = useState(false);
   const [badLoginMsg, setBadLoginMsg] = useState('');
+  const [isPressed, setIsPressed] = useState(false);
 
   const [formError, setFormError] = useState('');
   const [LoginScreenState, setLoginScreenState] = useState(LoginScreen);
@@ -169,6 +170,14 @@ const LoginRegister = ({ LoginScreen }) => {
     }
   };
 
+  const handlePressIn = () => {
+    setIsPressed(true);
+  };
+
+  const handlePressOut = () => {
+    setIsPressed(false);
+  };
+
   return (
     <View style={tw`flex-1 w-full items-center justify-center bg-[${backgroundColor}]`}>
       <Text style={[tw`mb-10 font-bold text-[${textColor}]`, styles.text]}>{LoginScreenState ? "Log in" : "Register"}</Text>
@@ -240,8 +249,16 @@ const LoginRegister = ({ LoginScreen }) => {
       )}
 
       {/* Sumbit Button */}
-      <TouchableOpacity style={tw`bg-blue-500 py-3 mt-4 rounded-lg w-1/2 text-${[textColor]}`} onPress={handleSumbit}>
-        <Text style={tw`text-[white] text-center`}>
+      <TouchableOpacity
+        style={[
+          tw`py-3 mt-4 rounded-lg w-1/2`,
+          isPressed ? styles.buttonPressed : styles.buttonNotPressed,
+        ]}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handleSumbit}
+      >
+        <Text style={isPressed ? styles.textPressed : styles.textNotPressed}>
           {LoginScreenState ? "Log in" : "Register"}
         </Text>
       </TouchableOpacity>
@@ -264,7 +281,47 @@ const LoginRegister = ({ LoginScreen }) => {
 const styles = StyleSheet.create({
   text: {
     fontSize: 45,
-  }
+  },
+  buttonNotPressed: {
+    borderBottomWidth: 2,
+    borderBottomColor: 'white',
+    backgroundColor: 'transparent',
+    width: '40%',
+    
+    
+  },
+  buttonPressed: {
+   
+    backgroundColor: 'white',
+    borderRadius: 3,
+    shadowColor: '#ffff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    width: '30%',
+    opacity: 0.9,
+    elevation: 30,
+    borderWidth: 1,
+    borderColor: 'black'
+    
+
+    
+    
+  },
+  textNotPressed: {
+    color: 'white',
+    textAlign: 'center',
+    textShadowColor: '#ffffff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  textPressed: {
+    color: 'white',
+    textAlign: 'center',
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
 });
 
 export default LoginRegister;
