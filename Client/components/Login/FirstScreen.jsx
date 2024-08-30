@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Pressable, ImageBackground, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Animated, Dimensions } from 'react-native';
 import tw from 'twrnc';
 import { useThemeColor } from '../../hooks/useThemeColor';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
   const backgroundColor = useThemeColor({}, 'background');
@@ -11,24 +13,6 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     SetFirstScreen(false);
     SetLoginScreenState(!register);
     console.log('FirstScreen --> SetLoginScreenState', !register);
-  };
-
-  // Animación de niebla
-  const translateX = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(translateX, {
-        toValue: -1000, // Ajusta este valor según el ancho de la imagen
-        duration: 15000,
-        easing: Easing.linear,
-        useNativeDriver: true, // Cambiado a true para mejor rendimiento
-      })
-    ).start();
-  }, [translateX]);
-
-  const animatedStyle = {
-    transform: [{ translateX }],
   };
 
   // Estados animados para los botones de Login y Register
@@ -125,20 +109,21 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     }),
   };
 
-  // Animaciones de glitch
-  const glitchAnim1 = useRef(new Animated.Value(0)).current;
-  const glitchAnim2 = useRef(new Animated.Value(0)).current;
+  // Animaciones de flicker
+  const flickerAnimI = useRef(new Animated.Value(0.4)).current;
+  const flickerAnimLG = useRef(new Animated.Value(0.19)).current;
+  const flickerAnimH = useRef(new Animated.Value(0.15)).current;
 
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(glitchAnim1, {
+        Animated.timing(flickerAnimI, {
           toValue: 1,
           duration: 2000,
           useNativeDriver: true,
         }),
-        Animated.timing(glitchAnim1, {
-          toValue: 0,
+        Animated.timing(flickerAnimI, {
+          toValue: 0.4,
           duration: 2000,
           useNativeDriver: true,
         }),
@@ -147,64 +132,59 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(glitchAnim2, {
-          toValue: 1,
-          duration: 3000,
+        Animated.timing(flickerAnimLG, {
+          toValue: 0.4,
+          duration: 2000,
           useNativeDriver: true,
         }),
-        Animated.timing(glitchAnim2, {
-          toValue: 0,
-          duration: 3000,
+        Animated.timing(flickerAnimLG, {
+          toValue: 0.19,
+          duration: 2000,
           useNativeDriver: true,
         }),
       ])
     ).start();
-  }, [glitchAnim1, glitchAnim2]);
 
-  const glitchStyle1 = {
-    transform: [
-      {
-        translateX: glitchAnim1.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 2],
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(flickerAnimH, {
+          toValue: 0.3,
+          duration: 2000,
+          useNativeDriver: true,
         }),
-      },
-    ],
-   
+        Animated.timing(flickerAnimH, {
+          toValue: 0.15,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [flickerAnimI, flickerAnimLG, flickerAnimH]);
 
-    color: 'white',
-    textShadowColor: 'black',
-    textShadowOffset: { width: 0, height: 0 },
+  const flickerStyleI = {
+    opacity: flickerAnimI,
   };
 
-  const glitchStyle2 = {
-    transform: [
-      {
-        translateX: glitchAnim2.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -2],
-        }),
-      },
-    ],
-    textShadowColor: 'white',
-    textShadowOffset: { width: 1, height: 0 },
-    textShadowRadius: 1,
+  const flickerStyleLG = {
+    opacity: flickerAnimLG,
+  };
+
+  const flickerStyleH = {
+    opacity: flickerAnimH,
   };
 
   return (
-    <ImageBackground 
-      source={require('../../assets/images/Fondo-Bosque.jpg')}
-      style={[tw`flex-1 w-full items-center justify-center`, styles.imagen]}
-    >
-      <View style={styles.overlay} />
+    <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={[tw`text-2xl`, { color: textColor }, styles.letra]}></Text>
-        <Animated.Text style={[styles.glitch, glitchStyle1]} data-text="WalkieTalkie">
-          WalkieTalkie
-        </Animated.Text>
-        <Animated.Text style={[styles.glitch, glitchStyle2]} data-text="WalkieTalkie">
-          WalkieTalkie
-        </Animated.Text>
+        <View style={styles.centro}>
+          <Animated.Text style={[styles.letter, flickerStyleLG]} id="L">H</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyleI]} id="I">E</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyleLG]} id="G">L</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">L</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">O</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">?</Animated.Text>
+        </View>
+        
         <Animated.View style={animatedButtonStyleLogin}>
           <Pressable
             style={({ pressed }) => [
@@ -238,38 +218,26 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
           </Pressable>
         </Animated.View>
       </View>
-      <View style={styles.fogContainer}>
-        <Animated.View style={[styles.fogRow, animatedStyle]}>
-          <ImageBackground 
-            source={require('../../assets/images/Fog1.png')}
-            style={styles.fogImage}
-          />
-          <ImageBackground 
-            source={require('../../assets/images/Fog1.png')}
-            style={styles.fogImage}
-          />
-          <ImageBackground 
-            source={require('../../assets/images/Fog1.png')}
-            style={styles.fogImage}
-          />
-          <ImageBackground 
-            source={require('../../assets/images/Fog1.png')}
-            style={styles.fogImage}
-          />
-        </Animated.View>
-      </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: screenWidth,
+    height: screenHeight,
+  },
   btn: {
     position: 'relative',
     paddingVertical: 24,
     paddingHorizontal: 64,
     borderRadius: 1000,
     backgroundColor: 'transparent',
-    fontFamily: 'Playfair Display, serif',
+    fontFamily: 'Montserrat', // Cambiado a Montserrat
     color: '#fafafa',
     overflow: 'hidden',
     cursor: 'pointer',
@@ -301,51 +269,20 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: 'white',
   },
-  imagen: {
-    flex: 1,
-    height: '100%', // Ajusta la altura según sea necesario
-    width: '100%',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo negro semitransparente
-    zIndex: 1,
-  },
   content: {
-    position: 'absolute',
-    zIndex: 2,
     alignItems: 'center',
   },
-  fogContainer: {
-    position: 'absolute',
-    bottom: 0,
-    height: 100, // Ajusta la altura según sea necesario
-    width: '100%', // Asegura que la imagen cubra el área de desplazamiento
-    overflow: 'hidden', // Asegura que el contenido no se desborde
-    zIndex: 1,
-  },
-  fogRow: {
-    flexDirection: 'row',
-    width: '400%', // Ajusta el ancho para que se superpongan ligeramente
-  },
-  fogImage: {
-    height: '100%', // Ajusta la altura según sea necesario
-    width: '25%', // Ajusta el ancho para que se superpongan ligeramente
-    resizeMode: 'cover',
-  },
-  letra: {
-    fontFamily: 'Varela, sans-serif',
-  },
-  glitch: {
-    color: 'white',
-    
-    textShadowRadius: 10,
-    fontSize: 65,
-    position: 'absolute',
-    bottom: 200,
-    width: 400,
-    margin: 0,
+  centro: {
     textAlign: 'center',
+    flexDirection: 'row',
+  },
+  letter: {
+    fontSize: 40,
+    color: '#f1f1f1',
+    letterSpacing: 10,
+    opacity: 0.15,
+    fontFamily: 'Helvetica',
+    fontStyle: 'italic' // Cambiado a Montserrat
   },
 });
 
