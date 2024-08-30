@@ -1,5 +1,5 @@
-import { React, useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import tw from 'twrnc';
 import { useThemeColor } from '../../hooks/useThemeColor';
 import axios from 'axios';
@@ -19,6 +19,71 @@ const LoginRegister = ({ LoginScreen }) => {
 
   const [formError, setFormError] = useState('');
   const [LoginScreenState, setLoginScreenState] = useState(LoginScreen);
+
+  // Animaciones para los placeholders
+  const usernamePlaceholderAnim = useRef(new Animated.Value(0)).current;
+  const emailPlaceholderAnim = useRef(new Animated.Value(0)).current;
+  const passwordPlaceholderAnim = useRef(new Animated.Value(0)).current;
+  const confPasswordPlaceholderAnim = useRef(new Animated.Value(0)).current;
+
+  const handleFocus = (anim) => {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleBlur = (anim, value) => {
+    if (value === '') {
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const handleChangeText = (setValue, anim, text) => {
+    setValue(text);
+    if (text !== '') {
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const placeholderStyle = (anim) => ({
+    position: 'absolute',
+    left: 10,
+    transform: [
+      {
+        translateY: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [15, -10],
+        }),
+      },
+      {
+        scale: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 0.8],
+        }),
+      },
+    ],
+    opacity: anim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0],
+    }),
+    color: textColor,
+  });
 
   // ====== Validar campos de registro ======
   const validateForm = () => {
@@ -59,7 +124,6 @@ const LoginRegister = ({ LoginScreen }) => {
         setBadLoginMsg('Please enter both your username and password.');
         return;
       }
-      // axios.post(`${SERVER_URL}/login`, { username, password }, { withCredentials: true })
       axios.post(`http://localhost:3000/login`, { username, password }, { withCredentials: true })
         .then((res) => {
           console.log(res);
@@ -107,57 +171,73 @@ const LoginRegister = ({ LoginScreen }) => {
 
   return (
     <View style={tw`flex-1 w-full items-center justify-center bg-[${backgroundColor}]`}>
-      <Text style={tw`text-xl mb-10 font-bold text-[${textColor}]`}>{LoginScreenState ? "Log in" : "Register"}</Text>
+      <Text style={[tw`mb-10 font-bold text-[${textColor}]`, styles.text]}>{LoginScreenState ? "Log in" : "Register"}</Text>
 
       {/* UserName */}
-      <TextInput
-        style={tw`h-10 my-3 border-b border-gray-400 w-4/5 px-2 text-[${textColor}]`}
-        onChangeText={setUsername}
-        value={username}
-        placeholder="Username"
-        placeholderTextColor={textColor}
-      />
+      <View style={tw`w-4/5 my-3`}>
+        <Animated.Text style={placeholderStyle(usernamePlaceholderAnim)}>Username</Animated.Text>
+        <TextInput
+          style={tw`h-10 border-b border-gray-400 px-2 text-[${textColor}]`}
+          onChangeText={(text) => handleChangeText(setUsername, usernamePlaceholderAnim, text)}
+          value={username}
+          onFocus={() => handleFocus(usernamePlaceholderAnim)}
+          onBlur={() => handleBlur(usernamePlaceholderAnim, username)}
+          placeholder=""
+          placeholderTextColor={textColor}
+        />
+      </View>
 
       {/* Email */}
       {!LoginScreenState && (
-        <>
+        <View style={tw`w-4/5 my-3`}>
+          <Animated.Text style={placeholderStyle(emailPlaceholderAnim)}>Email</Animated.Text>
           <TextInput
-            style={tw`h-10 my-3 border-b border-gray-400 w-4/5 px-2 text-[${textColor}]`}
-            onChangeText={(text) => { setEmail(text); }}
+            style={tw`h-10 border-b border-gray-400 px-2 text-[${textColor}]`}
+            onChangeText={(text) => handleChangeText(setEmail, emailPlaceholderAnim, text)}
             value={email}
-            placeholder="Email"
+            onFocus={() => handleFocus(emailPlaceholderAnim)}
+            onBlur={() => handleBlur(emailPlaceholderAnim, email)}
+            placeholder=""
             placeholderTextColor={textColor}
             keyboardType="email-address"
           />
           {emailError && <Text style={tw`text-red-600 text-sm pl-3`}>User name or password incorrect</Text>}
-        </>
+        </View>
       )}
 
       {/* Password */}
-      <TextInput
-        style={tw`h-10 my-3 border-b border-gray-400 w-4/5 px-2 text-[${textColor}]`}
-        onChangeText={(text) => setPassword(text)}
-        value={password}
-        placeholder="Password"
-        placeholderTextColor={textColor}
-        secureTextEntry
-      />
+      <View style={tw`w-4/5 my-3`}>
+        <Animated.Text style={placeholderStyle(passwordPlaceholderAnim)}>Password</Animated.Text>
+        <TextInput
+          style={tw`h-10 border-b border-gray-400 px-2 text-[${textColor}]`}
+          onChangeText={(text) => handleChangeText(setPassword, passwordPlaceholderAnim, text)}
+          value={password}
+          onFocus={() => handleFocus(passwordPlaceholderAnim)}
+          onBlur={() => handleBlur(passwordPlaceholderAnim, password)}
+          placeholder=""
+          placeholderTextColor={textColor}
+          secureTextEntry
+        />
+      </View>
       {badLogin && <Text style={tw`text-red-500`}>{badLoginMsg}</Text>}
 
-      { /* Confirm Password */}
-      {!LoginScreenState &&
-        <>
+      {/* Confirm Password */}
+      {!LoginScreenState && (
+        <View style={tw`w-4/5 my-3`}>
+          <Animated.Text style={placeholderStyle(confPasswordPlaceholderAnim)}>Confirm Password</Animated.Text>
           <TextInput
-            style={tw`h-10 my-3 border-b border-gray-400 w-4/5 px-2 text-[${textColor}]`}
-            onChangeText={(text) => setConfPassword(text)}
+            style={tw`h-10 border-b border-gray-400 px-2 text-[${textColor}]`}
+            onChangeText={(text) => handleChangeText(setConfPassword, confPasswordPlaceholderAnim, text)}
             value={Confpassword}
-            placeholder="Confirm Password"
+            onFocus={() => handleFocus(confPasswordPlaceholderAnim)}
+            onBlur={() => handleBlur(confPasswordPlaceholderAnim, Confpassword)}
+            placeholder=""
             placeholderTextColor={textColor}
             secureTextEntry
           />
           {formError ? <Text style={tw`text-red-500`}>{formError}</Text> : null}
-        </>
-      }
+        </View>
+      )}
 
       {/* Sumbit Button */}
       <TouchableOpacity style={tw`bg-blue-500 py-3 mt-4 rounded-lg w-1/2 text-${[textColor]}`} onPress={handleSumbit}>
@@ -180,5 +260,11 @@ const LoginRegister = ({ LoginScreen }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 45,
+  }
+});
 
 export default LoginRegister;
