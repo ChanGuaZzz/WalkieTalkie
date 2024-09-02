@@ -109,80 +109,73 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     }),
   };
 
-  // Animaciones de flicker
-  const flickerAnimI = useRef(new Animated.Value(0.4)).current;
-  const flickerAnimLG = useRef(new Animated.Value(0.19)).current;
-  const flickerAnimH = useRef(new Animated.Value(0.15)).current;
+  // Animación de parpadeo
+  const flickerAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flickerAnimI, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flickerAnimI, {
-          toValue: 0.4,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+    const flicker = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(flickerAnim, {
+            toValue: 1,
+            duration: 10,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 0,
+            duration: 20,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 1,
+            duration: 25,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 0,
+            duration: 53,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 1,
+            duration: 57,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flickerAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flickerAnimLG, {
-          toValue: 0.4,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flickerAnimLG, {
-          toValue: 0.19,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+    flicker();
+  }, [flickerAnim]);
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flickerAnimH, {
-          toValue: 0.3,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flickerAnimH, {
-          toValue: 0.15,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [flickerAnimI, flickerAnimLG, flickerAnimH]);
-
-  const flickerStyleI = {
-    opacity: flickerAnimI,
-  };
-
-  const flickerStyleLG = {
-    opacity: flickerAnimLG,
-  };
-
-  const flickerStyleH = {
-    opacity: flickerAnimH,
+  const flickerStyle = {
+    opacity: flickerAnim,
+    color: flickerAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['#010a01', '#fff'],
+    }),
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.centro}>
-          <Animated.Text style={[styles.letter, flickerStyleLG]} id="L">H</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyleI]} id="I">E</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyleLG]} id="G">L</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">L</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">O</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyleH]} id="H">?</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>H</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>E</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>L</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>L</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>O</Animated.Text>
+          <Animated.Text style={[styles.letter, flickerStyle]}>?</Animated.Text>
         </View>
         
         <Animated.View style={animatedButtonStyleLogin}>
@@ -240,8 +233,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat', // Cambiado a Montserrat
     color: '#fafafa',
     overflow: 'hidden',
-    cursor: 'pointer',
-    WebkitMaskImage: '-webkit-radial-gradient(white, black)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -282,7 +273,51 @@ const styles = StyleSheet.create({
     letterSpacing: 10,
     opacity: 0.15,
     fontFamily: 'Helvetica',
-    fontStyle: 'italic' // Cambiado a Montserrat
+    fontStyle: 'italic',
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 25,
+    textAlign: 'center',
+  },
+  shadowLayer1: {
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 0,
+  },
+  shadowLayer2: {
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 18,
+  },
+  shadowLayer3: {
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 22,
+  },
+  shadowLayer4: {
+    textShadowColor: '#0fa',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 25,
+  },
+  shadowLayer5: {
+    textShadowColor: '#0fa',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 53,
+  },
+  shadowLayer6: {
+    textShadowColor: '#0fa',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 57,
+  },
+  shadowLayer7: {
+    textShadowColor: '#0fa',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 100,
+  },
+  shadowLayer8: {
+    textShadowColor: '#0fa',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 100,
   },
 });
 
