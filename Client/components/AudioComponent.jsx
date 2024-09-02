@@ -10,7 +10,7 @@ import { useSocket } from './context/SocketContext';
 const { SOCKET_URL } = getEnvVars();
 // let socket=io(SOCKET_URL,{ query : { groups: "[]" }})
 // let socket;
-const AudioComponent = ({ currentRoom, userID }) => {
+const AudioComponent = ({ currentRoom}) => {
   // Estados 
   const [recording, setRecording] = useState();
   const [permissionStatus, setPermissionStatus] = useState(null);

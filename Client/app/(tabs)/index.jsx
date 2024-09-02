@@ -1,6 +1,6 @@
 //Client/app/(tabs)/index.jsx
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import tw from 'twrnc';
 import AudioComponent from '../../components/AudioComponent';
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -12,7 +12,7 @@ const Index = () => {
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const [currentRoom, setCurrentRoom] = useState(null);
-  const rooms = ['room1', 'room2', 'room3', 'room4', 'room5'];
+  const [recentRooms,setRecentRooms] = useState(['FakeRoomRecent']);
   const [userID, setUserID] = useState();
   const [username, setUsername] = useState();
   const { SERVER_URL } = getEnvVars();
@@ -36,26 +36,13 @@ const Index = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (!currentRoom) return;
-    socket.emit('join', { currentRoom: currentRoom, userID: userID, });
-    console.log('user ', userID, ' Joined room ', currentRoom);
-  }, [currentRoom]);
-
   const acceptRequest = (senderId) => {
     console.log('Solicitud aceptada de:', senderId);
     socket.emit('accept_request', { senderId: senderId, receiverId: username });
     setModalVisible(!modalVisible);
   }
+ 
 
-  const styles = StyleSheet.create({
-    centeredView: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 22,
-    },
-  });
 
   return (
     <View style={tw`flex-1 items-center justify-center bg-[${backgroundColor}]`}>
@@ -90,18 +77,17 @@ const Index = () => {
         </View>
       </Modal>
       <View>
-        <Text style={tw`text-[${textColor}] text-2xl font-bold`}>Bienvenido {userID} </Text>
-        <Text style={tw`text-[${textColor}] text-2xl font-bold`}>Salas</Text>
+        <Text style={tw`text-[${textColor}] text-2xl font-bold my-4`}>Bienvenido {username} </Text>
+        <Text style={tw`text-[${textColor}] text-center text-1xl font-bold`}>Recientes</Text>
         <View style={tw`flex flex-col items-center `}>
-          {rooms.map((room, index) => (
+          {recentRooms.map((room, index) => (
             <TouchableOpacity key={index} onPress={() => setCurrentRoom(room)} style={tw`mt-2 bg-slate-700 rounded-full p-2 `}>
               <Text style={tw`text-[${textColor}]`}>Ir a {room}</Text>
             </TouchableOpacity>
           ))
           }
         </View>
-        <Text style={tw`text-[${textColor}] mb-5`}>Sala {currentRoom} </Text>
-        <AudioComponent currentRoom={currentRoom} userID={userID} />
+        <Text style={tw`text-[${textColor}] mb-5 text-center`}>Sala actual {currentRoom} </Text>
       </View>
     </View>
   );

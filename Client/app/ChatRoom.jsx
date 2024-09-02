@@ -29,7 +29,7 @@ export default function ChatRoom() {
   return (
     <View style={tw`flex-1 bg-[${backgroundColor}] items-center justify-center`}>
       {userID != undefined &&
-        <AudioComponent currentRoom={currentRoom} userID={userID} />
+        <AudioComponent currentRoom={currentRoom}/>
       }
     </View>
   );

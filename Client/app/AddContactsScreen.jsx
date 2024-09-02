@@ -70,6 +70,7 @@ export default function AddContactsScreen() {
       socket.emit('send_request', { senderId, receiverId });
 
       console.log('Solicitud enviada a:', receiverId);
+      setusers(users.filter((useradded) => useradded.name !== receiverId))
     }
   };
 

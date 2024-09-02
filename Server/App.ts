@@ -89,6 +89,31 @@ class Users extends Model {
   }
 }
 
+class Rooms extends Model {
+  declare id: number;
+  declare name: string;
+}
+
+Rooms.init( 
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING(50),
+      unique: true,
+      allowNull: false,
+    },
+  },
+  {
+    sequelize, // This is the sequelize instance
+    modelName: 'Rooms',
+    // Other model options go here
+  }
+);
+
 Users.init(
   {
     id: {
@@ -171,8 +196,9 @@ app.post('/login', async (req, res) => {
   if (user && user.checkPassword(password)) {
     console.log('User found in database');
     user.dataValues.password = undefined; // Remove password from user info
-    user.dataValues.groups = JSON.parse(user.dataValues.groups); // Remove groups from user info
+    user.dataValues.groups = JSON.parse(user.dataValues.groups); // parsea los grupos de usuario
     user.dataValues.contacts = JSON.parse(user.dataValues.contacts); // Remove contacts from user info
+    console.log('UserValuesLISTOS:', user.dataValues);
     req.session.user = user.dataValues; // Store user info in session
     req.session.save();
     console.log('sesion guardada:', req.session);
@@ -211,7 +237,55 @@ app.post('/logout', (req, res) => {
     }
   });
 });
+// =================================================================Search Room=================================================================
+app.post('/searchRoom', async (req, res) => {
+  const { roomsearch, username } = req.body;
+  console.log('server room: ' + roomsearch);
 
+  const user = await Users.findOne({
+    where: {
+      username: username,
+    },
+  });
+  let groupsofuser = [];
+  let groupsofuserDB;
+
+  if (user && user !== null && user.groups !== null) {
+    groupsofuserDB = JSON.parse(user.groups);
+
+    if (typeof groupsofuserDB === 'string') {
+      groupsofuserDB = JSON.parse(groupsofuserDB);
+    }
+  }
+
+  groupsofuser = groupsofuserDB.map((group: any) => group.name); // se obtienen los nombres de los grupos del usuario
+
+  const rooms = await Rooms.findAll({
+    where: {
+      [Op.and]: [
+        {
+          name: {
+            [Op.like]: `%${roomsearch}%`, // This will match any room that contains the search string
+          },
+        },
+        {
+          name: {
+            [Op.notIn]: groupsofuser, // This will exclude the groups provided
+          },
+        },
+      ],
+    },
+  }); 
+
+  if (rooms.length > 0) {
+    res.status(200).send(rooms); // Send back the list of matching rooms
+  } else {
+    res.status(404).send('No rooms found');
+  }
+}
+);
+// =================================================================
+// =================================================================Search User=================================================================
 app.post('/searchUser', async (req, res) => {
   const { usernamesearch, username } = req.body;
   console.log('server user: ' + usernamesearch);
@@ -275,14 +349,6 @@ const savecontacts = (user: any, usernameContact: string, currentRoom: any) => {
     const contact = { username: usernameContact, room: currentRoom };
     if (!contacts.some((c: any) => c.username === contact.username && c.room === contact.room)) {
       // se verifica si el contacto ya esta en la lista ##AQUI VOY
-      console.log(
-        'contacto incluye?',
-        contacts.includes(contact),
-        'contacto:',
-        contact,
-        'contacts:',
-        contacts
-      );
       contacts.push(contact);
       user.setcontacts(contacts);
       user.save().then(() => {
@@ -302,7 +368,7 @@ io.on('connection', (socket: Socket) => {
   if (typeof groups === 'string' && groups.trim()) {
     try {
       JSON.parse(groups).map((group: any) => {
-        socket.join(group);
+        socket.join(group.name);
         console.log('User joined group:', group);
       });
     } catch (error) {
@@ -331,35 +397,22 @@ io.on('connection', (socket: Socket) => {
     console.log('Usuarios conectadossssssssssssssss:', connectedUsers);
   }
 
-  // =================================================================
-  // *Socket send request*
-  // =================================================================
-  socket.on('send_request', (data: { senderId: string; receiverId: string }) => {
-    const { senderId, receiverId } = data;
-    const receiverSocketId = connectedUsers[receiverId];
-
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('receive_request', { senderId });
-      console.log(`Solicitud enviada de ${senderId} a ${receiverId}`);
-    }
-  });
-  // ======================*END Socket send request*===================
-
+  
   // =================================================================
   // *Socket Join room*
   // =================================================================
   socket.on('join', async (data) => {
-    const currentRoom = data.currentRoom; // Nombre de la sala a la que se une
+    const room = data.room; // Nombre de la sala a la que se une
     // const forContacts = data.forContacts;
-    socket.join(currentRoom);
+    socket.join(room);
     console.log('salas', socket.rooms);
     console.log('Entra a una sala');
-    console.log('UserID:', data.userID);
+    console.log('Username:', data.username);
 
     // if(!forContacts){
     const user = await Users.findOne({
       where: {
-        id: data.userID,
+        username: data.username,
       },
     });
     if (user && user.groups) {
@@ -368,8 +421,10 @@ io.on('connection', (socket: Socket) => {
       if (typeof groups === 'string') {
         groups = JSON.parse(groups);
       }
-      if (!groups.includes(currentRoom)) {
-        groups.push(currentRoom);
+    const newgroup = { name: room };
+      
+      if (!groups.some((g: any) => g.name === newgroup.name)) {// se verifica si el grupo ya esta en la lista
+        groups.push(newgroup);
         user.setgroups(groups);
         user
           .save()
@@ -385,11 +440,26 @@ io.on('connection', (socket: Socket) => {
     }
     // }
     socket
-      .to(currentRoom)
+      .to(room)
       .emit('notification', `${user ? user.username : 'null'} has entered the room.`);
-    console.log(`${user ? user.username : 'null'} joined room: ${currentRoom}`);
+    console.log(`${user ? user.username : 'null'} joined room: ${room}`);
   });
   // ======================*END Socket JOIN*===================
+
+  // =================================================================
+  // *Socket send request*
+  // =================================================================
+  socket.on('send_request', (data: { senderId: string; receiverId: string }) => {
+    const { senderId, receiverId } = data;
+    const receiverSocketId = connectedUsers[receiverId];
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('receive_request', { senderId });
+      console.log(`Solicitud enviada de ${senderId} a ${receiverId}`);
+    }
+  });
+  // ======================*END Socket send request*===================
+
 
   // =================================================================
   // *Socket Accept Request*
