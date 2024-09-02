@@ -36,6 +36,12 @@ const Index = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (!currentRoom) return;
+    socket.emit('join', { currentRoom: currentRoom, userID: userID, });
+    console.log('user ', userID, ' Joined room ', currentRoom);
+  }, [currentRoom]);
+
   const acceptRequest = (senderId) => {
     console.log('Solicitud aceptada de:', senderId);
     socket.emit('accept_request', { senderId: senderId, receiverId: username });

@@ -350,11 +350,13 @@ io.on('connection', (socket: Socket) => {
   // =================================================================
   socket.on('join', async (data) => {
     const currentRoom = data.currentRoom; // Nombre de la sala a la que se une
+    // const forContacts = data.forContacts;
     socket.join(currentRoom);
     console.log('salas', socket.rooms);
     console.log('Entra a una sala');
     console.log('UserID:', data.userID);
 
+    // if(!forContacts){
     const user = await Users.findOne({
       where: {
         id: data.userID,
@@ -381,6 +383,7 @@ io.on('connection', (socket: Socket) => {
         console.log('Ya esta en el grupo');
       }
     }
+    // }
     socket
       .to(currentRoom)
       .emit('notification', `${user ? user.username : 'null'} has entered the room.`);

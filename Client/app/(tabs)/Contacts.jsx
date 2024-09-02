@@ -29,6 +29,7 @@ export default function TabTwoScreen() {
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
         .then((res) => {
           setUsername(res.data.user.username);
+          console.log('usuario definidon en contacts', res.data.user.username);
           const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
             name: contact.username,
             room: contact.room,
@@ -47,7 +48,7 @@ export default function TabTwoScreen() {
         axios.post(`http://localhost:3000/refreshSession`, { username }, { withCredentials: true })
           .then((res) => {
 
-            console.log('CONTACTS SESSIONSSS', res.data.user.contacts);
+            console.log('CONTACTS REFRESCADOOOOOOOOS', res.data.user.contacts);
             const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
               name: contact.username,
               room: contact.room,

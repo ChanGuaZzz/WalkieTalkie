@@ -68,11 +68,7 @@ const AudioComponent = ({ currentRoom, userID }) => {
   }, [socket]);
 
 
-  useEffect(() => {
-    if (!currentRoom) return;
-    socket.emit('join', { currentRoom: currentRoom, userID: userID, });
-    console.log('user ', userID, ' Joined room ', currentRoom);
-  }, [currentRoom]);
+ 
 
   // Funcion para iniciar la grabacion de audio
   const startRecording = async () => {
