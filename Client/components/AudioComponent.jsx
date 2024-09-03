@@ -31,41 +31,26 @@ const AudioComponent = ({ currentRoom}) => {
   }, []);
 
   // useEffect(() => {
-  //   let newsocket;
-  //   axios.get(`http://localhost:3000/getsession`,{ withCredentials: true })
-  //   .then((res) => {
-  //     console.log("SESSIONES",res.data);
-  //     newsocket=io(SOCKET_URL,{ query : { groups: res.data.user.groups }}); 
-  //     setSocket(newsocket);
-  //     setGroups(JSON.parse(res.data.user.groups)); })
-  //   .catch((error) => {console.log(error)});
+  //   if (socket != null) {
+  //     socket.on('receive-audio', async (base64Audio, room) => {
+  //       console.log('Received audio data from room', room);
+  //       const uri = `data:audio/wav;base64,${base64Audio}`;
+  //       console.log("audio enviado", uri);
 
-  //   return () => {
-  //     newsocket.disconnect();
-  //   };
-  // }, []);
+  //       // Play audio using expo-av
+  //       const { sound } = await Audio.Sound.createAsync(
+  //         { uri },
+  //         { shouldPlay: true }
+  //       );
+  //       await sound.setVolumeAsync(1.0); // Ensure volume is set to maximum
+  //       await sound.playAsync();
+  //     });
 
-  useEffect(() => {
-    if (socket != null) {
-      socket.on('receive-audio', async (base64Audio, room) => {
-        console.log('Received audio data from room', room);
-        const uri = `data:audio/wav;base64,${base64Audio}`;
-        console.log("audio enviado", uri);
-
-        // Play audio using expo-av
-        const { sound } = await Audio.Sound.createAsync(
-          { uri },
-          { shouldPlay: true }
-        );
-        await sound.setVolumeAsync(1.0); // Ensure volume is set to maximum
-        await sound.playAsync();
-      });
-
-      return () => {
-        socket.off('receive-audio');
-      };
-    }
-  }, [socket]);
+  //     return () => {
+  //       socket.off('receive-audio');
+  //     };
+  //   }
+  // }, [socket]);
 
 
  
