@@ -15,6 +15,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
   const [modalIconVisible, setModalIconVisible] = useState(false);
   const [username, setusername] = useState();
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
+  const [userID, setUserID] = useState(null)
 
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
         .then((res) => { 
           setusername(res.data.user.username); 
+          setUserID(res.data.user.id)
            })
         .catch((error) => { console.log(error) });
   }, []);
