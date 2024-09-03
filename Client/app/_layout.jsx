@@ -14,6 +14,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketProvider } from '../components/context/SocketContext';
 import createSocket from '../components/context/CreateSocket';
+import { Audio } from 'expo-av';
 
 export default function RootLayout() {
   const [modalIconVisible, setModalIconVisible] = useState(false);
@@ -72,6 +73,28 @@ export default function RootLayout() {
         setIsSocketConnected(true);
         console.log('ESTA CONECTADO');
       });
+    }
+  }, [socket]);
+
+useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la app
+    if (socket != null) {
+      socket.on('receive-audio', async (base64Audio, room) => {
+        console.log('Received audio data from room', room);
+        const uri = `data:audio/wav;base64,${base64Audio}`;
+        console.log("audio enviado", uri);
+
+        // Play audio using expo-av
+        const { sound } = await Audio.Sound.createAsync(
+          { uri },
+          { shouldPlay: true }
+        );
+        await sound.setVolumeAsync(1.0); // Ensure volume is set to maximum
+        await sound.playAsync();
+      });
+
+      return () => {
+        socket.off('receive-audio');
+      };
     }
   }, [socket]);
 

@@ -19,24 +19,18 @@ export default function TabTwoScreen() {
   const textColor = useThemeColor({}, 'text');
   const navigation = useNavigation(); // Use the useNavigation hook
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
-  const [currentRoom, setCurrentRoom] = useState(null);
-  const [rooms, setRooms] = useState([{ name: 'room1' }, { name: 'room2' }, { name: 'room3' }, { name: 'room4' }, { name: 'room5' }]);
   const [roomsAmIn, setRoomsAmIn] = useState([]);
   const [username, setusername] = useState();
   const { SERVER_URL } = getEnvVars();
 
-  useEffect(() => {
-    if (socket != null) {
-      console.log(socket, 'socket EN Groups');
-    }
-  }, []);
 
   useEffect(() => {
     if (socket != null) {
-      console.log(socket, 'socket EN INDEX');
+      console.log(socket, 'socket EN groups');
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-        .then((res) => { setusername(res.data.user.username); 
+        .then((res) => { 
+          setusername(res.data.user.username); 
           setRoomsAmIn(JSON.parse(res.data.user.groups)); 
           
           console.log('Session', res.data) })
@@ -46,15 +40,25 @@ export default function TabTwoScreen() {
   }, [])
 
   useEffect(() => {
-    if (!currentRoom) return;
-    socket.emit('join', { room: currentRoom, username: username, });
-    console.log('user ', username, ' Joined room ', currentRoom);
-  }, [currentRoom]);
-
-  useEffect(() => {
     console.log('roomsAmIn', roomsAmIn);
   }
     , [roomsAmIn]);
+
+    useEffect(() => {
+      if (username != null) {
+        socket.on('refreshgroups', () => {
+          console.log('REFRESH groups');
+          axios.post(`http://localhost:3000/refreshSession`, { username }, { withCredentials: true })
+            .then((res) => {
+  
+              console.log('GRUPOS REFRESCADOOOOOOOOS', res.data.user.contacts);
+              setRoomsAmIn(JSON.parse(res.data.user.groups)); 
+
+            })
+            .catch((error) => { console.log(error) });
+        });
+      }
+    }, [username]);
 
 
 
@@ -65,7 +69,8 @@ export default function TabTwoScreen() {
 
         {
           roomsAmIn && roomsAmIn.length == 0 ?
-          <Text style={tw`text-[${textColor}]`}>No tienes grupos</Text> 
+          <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No there groups...</Text>
+
           :
           roomsAmIn.map((room, index) =>{ 
 

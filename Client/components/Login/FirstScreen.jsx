@@ -170,12 +170,12 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.centro}>
-          <Animated.Text style={[styles.letter, flickerStyle]}>H</Animated.Text>
+          <Animated.Text style={styles.letter}>H</Animated.Text>
           <Animated.Text style={[styles.letter, flickerStyle]}>E</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyle]}>L</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyle]}>L</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyle]}>O</Animated.Text>
-          <Animated.Text style={[styles.letter, flickerStyle]}>?</Animated.Text>
+          <Animated.Text style={styles.letter}>L</Animated.Text>
+          <Animated.Text style={styles.letter}>L</Animated.Text>
+          <Animated.Text style={styles.letter}>O</Animated.Text>
+          <Animated.Text style={styles.letter}>?</Animated.Text>
         </View>
         
         <Animated.View style={animatedButtonStyleLogin}>
