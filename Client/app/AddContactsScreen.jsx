@@ -18,6 +18,7 @@ export default function AddContactsScreen() {
   const [text, setText] = useState(""); // Step 1: State for tracking text input
   const [userFound, setUserFound] = useState(undefined); // Step 2: State to track if user is found
   const [username, setUsername] = useState();
+  const [userID, setUserID] = useState(null)
   const [socket, setSocket] = useState(useSocket());
   const [users, setUsers] = useState([
     {
@@ -29,7 +30,7 @@ export default function AddContactsScreen() {
   useEffect(() => {
     axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
       // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-      .then((res) => { setUsername(res.data.user.username) })
+      .then((res) => { setUsername(res.data.user.username); setUserID(res.data.user.id) })
       .catch((error) => { console.log(error) });
   }, [])
 
