@@ -193,6 +193,33 @@ app.post('/create-user', async (req, res) => {
   }
 });
 
+app.post('/update-user', async (req, res) => {
+  const { PropToChange, userID, newProp } = req.body;
+  console.log('userID', userID)
+  try {
+    const user = await Users.findOne({ where: { id: userID } });
+
+    if (!user) {
+      return res.status(404).send('User not found.');
+    }
+
+    if (PropToChange === 'password') {
+      user.setPassword(newProp);
+    } else if (PropToChange === 'email') {
+      user.email = newProp;
+    } else if (PropToChange === 'username') {
+      user.username = newProp;
+    } else {
+      return res.status(400).send('Invalid property to change.');
+    }
+    await user.save();
+    res.status(200).send('User updated successfully.');
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).send('Failed to update user.');
+  }
+});
+
 app.get('/getsession', async (req, res) => {
   res.json(req.session);
 });
@@ -225,10 +252,10 @@ app.post('/login', async (req, res) => {
 });
 
 app.post('/refreshSession', async (req, res) => {
-  const { username } = req.body;
+  const { id } = req.body;
   const user = await Users.findOne({
     where: {
-      username: username,
+      id: id,
     },
   });
 
@@ -347,48 +374,6 @@ app.post('/searchUser', async (req, res) => {
     res.status(404).send('No users found');
   }
 });
-// =================================================================
-
-
-// =============================DELETE CONTACT====================================
-// app.post('/deleteContact', async (req, res) => {
-
-
-  // socket.on('join', async (data) => {
-  // const { username, contact } = data;
-  // const userA = await Users.findOne({
-  //   where: {
-  //     username: username,
-  //   },
-  // });
-  // const userB = await Users.findOne({
-  //   where: {
-  //     username: contact.name,
-  //   },
-  // });
-  //   if(userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null){ 
-  //   let contactsUserA = JSON.parse(userA.contacts);
-  //   let contactsUserB = JSON.parse(userB.contacts);
-  //   if (typeof contactsUserA === 'string') {
-  //     contactsUserA = JSON.parse(contactsUserA);
-  //     }
-  //   if (typeof contactsUserB === 'string') {
-  //     contactsUserB = JSON.parse(contactsUserB);
-  //     }
-  //   contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
-  //   contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
-  //   userA.setcontacts(contactsUserA);
-  //   userB.setcontacts(contactsUserB);
-  //   userA.save();
-  //   userB.save(); 
-  //   } 
-  //   else {
-  //   }
-  // });
-
-
-  // });
-
 
 // =================================================================
 // * Messages and socket.io*
@@ -502,53 +487,58 @@ io.on('connection', (socket: Socket) => {
   });
   // ======================*END Socket JOIN*===================
 
-// ============================*DeleteContact*=====================================
+  // ============================= DELETE CONTACT ====================================
 
   socket.on('deleteContact', async (data) => {
-  const { username, contact } = data;
-  const userA = await Users.findOne({
-    where: {
-      username: username,
-    },
-  });
-  const userB = await Users.findOne({
-    where: {
-      username: contact.name,
-    },
-  });
-  
+    const { username, contact } = data;
+    const userA = await Users.findOne({
+      where: {
+        username: username,
+      },
+    });
+    const userB = await Users.findOne({
+      where: {
+        username: contact.name,
+      },
+    });
 
-    if(userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null){ 
-    const senderSocketId = connectedUsers[userA.username];
-    const receiverSocketId = connectedUsers[userB.username];
+    if (
+      userA &&
+      userA !== null &&
+      userA.contacts !== null &&
+      userB &&
+      userB !== null &&
+      userB.contacts !== null
+    ) {
+      const senderSocketId = connectedUsers[userA.username];
+      const receiverSocketId = connectedUsers[userB.username];
 
-
-    let contactsUserA = JSON.parse(userA.contacts);
-    let contactsUserB = JSON.parse(userB.contacts);
-    if (typeof contactsUserA === 'string') {
-      contactsUserA = JSON.parse(contactsUserA);
+      let contactsUserA = JSON.parse(userA.contacts);
+      let contactsUserB = JSON.parse(userB.contacts);
+      if (typeof contactsUserA === 'string') {
+        contactsUserA = JSON.parse(contactsUserA);
       }
-    if (typeof contactsUserB === 'string') {
-      contactsUserB = JSON.parse(contactsUserB);
+      if (typeof contactsUserB === 'string') {
+        contactsUserB = JSON.parse(contactsUserB);
       }
-    contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
-    contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
-    userA.setcontacts(contactsUserA);
-    userB.setcontacts(contactsUserB);
-    userA.save();
-    userB.save(); 
-    console.log('Contacto eliminado');
-    io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
-    io.to(senderSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
-    } 
-    else {
+      contactsUserA = contactsUserA.filter(
+        (contactuserA: any) => contactuserA.room !== contact.room
+      );
+      contactsUserB = contactsUserB.filter(
+        (contactuserB: any) => contactuserB.room !== contact.room
+      );
+      userA.setcontacts(contactsUserA);
+      userB.setcontacts(contactsUserB);
+      userA.save();
+      userB.save();
+      console.log('Contacto eliminado');
+      io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
+      io.to(senderSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
+    } else {
       console.log('No se encontro el contacto');
     }
   });
 
-
-
-  
   // =================================================================
   // *Socket send request*
   // =================================================================

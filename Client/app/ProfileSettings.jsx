@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { SafeAreaView, Text, View, TouchableOpacity, Pressable, Animated, Easing } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import tw from "twrnc";
@@ -19,7 +19,35 @@ const ProfileSettings = () => {
   const [PropToChange, setPropToChange] = useState("");
   const [ModalIcon, setModalIcon] = useState("");
   const [isPassword, setIsPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [userEmail, setuserEmail] = useState("");
+  const [userID, setUserID] = useState("");
+  // Sessions
 
+  // Get username
+  useEffect(() => {
+    axios.get('http://localhost:3000/getsession', { withCredentials: true })
+      .then((res) => {
+        console.log('res', res)
+        setUsername(res.data.user.username)
+        setuserEmail(res.data.user.email)
+        setUserID(res.data.user.id)
+      })
+      .catch((error) => { console.log(error) });
+  }, []);
+
+  useEffect(() => {
+    console.log("username", username);
+    console.log("userEmail", userEmail);
+  }, [username, userEmail]);
+
+  const refreshSession = () => {
+    axios.post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true })
+      .then((res) => {
+        setUsername(res.data.user.username);
+        setuserEmail(res.data.user.email);
+      }).catch((error) => { console.log(error) });
+  };
   // Change profile picture
   const onChangePicture = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -142,7 +170,7 @@ const ProfileSettings = () => {
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
                     <Text style={tw`text-[${disabledText}] mb-1`}>User name</Text>
-                    <Text style={tw`text-[${textColor}]`}>Username</Text>
+                    <Text style={tw`text-[${textColor}]`}>{username}</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
@@ -164,7 +192,7 @@ const ProfileSettings = () => {
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
                     <Text style={tw`text-[${disabledText}] mb-1`}>Email</Text>
-                    <Text style={tw`text-[${textColor}]`}>userEmail</Text>
+                    <Text style={tw`text-[${textColor}]`}>{userEmail}</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
@@ -186,7 +214,7 @@ const ProfileSettings = () => {
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
                     <Text style={tw`text-[${disabledText}] mb-1`}>Password</Text>
-                    <Text style={tw`text-[${textColor}]`}>userPassword</Text>
+                    <Text style={tw`text-[${textColor}]`}>***</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
@@ -197,7 +225,7 @@ const ProfileSettings = () => {
         </View>
         {/* ChangeProfileModal */}
         {ChangeProfileModalVisible && (
-          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} />
+          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} refreshSession={refreshSession} userID={userID} />
         )}
       </SafeAreaView>
     </GestureHandlerRootView>

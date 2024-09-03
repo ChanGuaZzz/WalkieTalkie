@@ -22,6 +22,8 @@ export default function TabTwoScreen() {
   const [roomsAmIn, setRoomsAmIn] = useState([]);
   const [username, setusername] = useState();
   const { SERVER_URL } = getEnvVars();
+  const [userID, setUserID] = useState(null)
+
 
 
   useEffect(() => {
@@ -29,11 +31,13 @@ export default function TabTwoScreen() {
       console.log(socket, 'socket EN groups');
       axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-        .then((res) => { 
-          setusername(res.data.user.username); 
-          setRoomsAmIn(JSON.parse(res.data.user.groups)); 
-          
-          console.log('Session', res.data) })
+        .then((res) => {
+          setusername(res.data.user.username);
+          setUserID(res.data.user.id)
+          setRoomsAmIn(JSON.parse(res.data.user.groups));
+
+          console.log('Session', res.data)
+        })
         .catch((error) => { console.log(error) });
 
     }
@@ -44,21 +48,18 @@ export default function TabTwoScreen() {
   }
     , [roomsAmIn]);
 
-    useEffect(() => {
-      if (username != null) {
-        socket.on('refreshgroups', () => {
-          console.log('REFRESH groups');
-          axios.post(`http://localhost:3000/refreshSession`, { username }, { withCredentials: true })
-            .then((res) => {
-  
-              console.log('GRUPOS REFRESCADOOOOOOOOS', res.data.user.contacts);
-              setRoomsAmIn(JSON.parse(res.data.user.groups)); 
-
-            })
-            .catch((error) => { console.log(error) });
-        });
-      }
-    }, [username]);
+  useEffect(() => {
+    if (userID != null) {
+      socket.on('refreshgroups', () => {
+        console.log('REFRESH groups');
+        axios.post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true }).then((res) => {
+          console.log('GRUPOS REFRESCADOOOOOOOOS', res.data.user.contacts);
+          setRoomsAmIn(JSON.parse(res.data.user.groups));
+        })
+          .catch((error) => { console.log(error) });
+      });
+    }
+  }, [userID]);
 
 
 
@@ -67,31 +68,31 @@ export default function TabTwoScreen() {
     <View style={tw`flex-1 items-center  bg-[${backgroundColor}]`}>
 
 
-        {
-          roomsAmIn && roomsAmIn.length == 0 ?
+      {
+        roomsAmIn && roomsAmIn.length == 0 ?
           <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No there groups...</Text>
 
           :
-          roomsAmIn.map((room, index) =>{ 
+          roomsAmIn.map((room, index) => {
 
-            const roomdata={
-              name:room.name,
-              profile:GroupIcon,
-              room:room.name
+            const roomdata = {
+              name: room.name,
+              profile: GroupIcon,
+              room: room.name
             }
 
             return (
-            <ChatComponent user={roomdata} key={index} onPress={() => navigation.navigate('ChatRoom', { user: roomdata })} iscontact={false} icon='mic' />
+              <ChatComponent user={roomdata} key={index} onPress={() => navigation.navigate('ChatRoom', { user: roomdata })} iscontact={false} icon='mic' />
             )
-        })
-          
+          })
 
-          //   rooms.map((room, index) => (
-          // <TouchableOpacity key={index} onPress={() => setCurrentRoom(room.name)} style={tw`mt-2 bg-slate-700 rounded-full p-2 `}>
-          //       <Text style={tw`text-[${textColor}]`}>Ir a {room.name}</Text>
-          //     </TouchableOpacity>
-          // ))
-        }
+
+        //   rooms.map((room, index) => (
+        // <TouchableOpacity key={index} onPress={() => setCurrentRoom(room.name)} style={tw`mt-2 bg-slate-700 rounded-full p-2 `}>
+        //       <Text style={tw`text-[${textColor}]`}>Ir a {room.name}</Text>
+        //     </TouchableOpacity>
+        // ))
+      }
 
 
 

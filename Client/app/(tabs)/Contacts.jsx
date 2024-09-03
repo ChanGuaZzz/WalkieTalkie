@@ -20,6 +20,7 @@ export default function TabTwoScreen() {
   const [contacts, setContacts] = useState([]);
   const [username, setUsername] = useState(null);
   const textColor = useThemeColor({}, 'text');
+  const [userID, setUserID] = useState(null)
 
   useEffect(() => {
     if (socket != null) {
@@ -29,6 +30,7 @@ export default function TabTwoScreen() {
         // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
         .then((res) => {
           setUsername(res.data.user.username);
+          setUserID(res.data.user.id)
           console.log('usuario definidon en contacts', res.data.user.username);
           const lastcontacts = JSON.parse(res.data.user.contacts).map((contact) => ({ // Parsea los contactos y los guarda en el estado SE DEBE HACER UN ENDPOINT PARA OBTENER LA FOTO DEL CONTACTO
             name: contact.username,
@@ -42,10 +44,10 @@ export default function TabTwoScreen() {
   }, []);
 
   useEffect(() => {
-    if (username != null) {
+    if (userID != null) {
       socket.on('refreshcontacts', () => {
         console.log('REFRESH CONTACTS');
-        axios.post(`http://localhost:3000/refreshSession`, { username }, { withCredentials: true })
+        axios.post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true })
           .then((res) => {
 
             console.log('CONTACTS REFRESCADOOOOOOOOS', res.data.user.contacts);
@@ -61,7 +63,7 @@ export default function TabTwoScreen() {
           .catch((error) => { console.log(error) });
       });
     }
-  }, [username]);
+  }, [userID]);
 
   useEffect(() => {
     console.log('CONTACTS', contacts);
