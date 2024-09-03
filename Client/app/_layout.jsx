@@ -101,7 +101,6 @@ useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        {console.log("comprobarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr logeado: ", isLoggedIn, socket)}
         {/* Alvaro comenta la linea de abajo u.u */}
         {isLoggedIn && isSocketConnected ? (
           <SocketProvider socket={socket}>

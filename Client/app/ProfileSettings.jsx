@@ -1,32 +1,120 @@
-//ProfileSettings
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import tw from 'twrnc';
-import { useThemeColor } from '../hooks/useThemeColor';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
+import React, { useRef, useState } from "react";
+import { SafeAreaView, Text, View, TouchableOpacity, Pressable, Animated, Easing } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import tw from "twrnc";
+import { useThemeColor } from "../hooks/useThemeColor";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import ChangeProfileModal from "../components/modals/ChangeProfileModal";
+import axios from "axios";
 
 const ProfileSettings = () => {
-  const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text');
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const disabledText = useThemeColor({}, "disabledText");
+  const [isAnimated, setIsAnimated] = useState(false);
+  const [isMoved, setIsMoved] = useState(false);
+  const [activePressable, setActivePressable] = useState(null);
+  const [ChangeProfileModalVisible, setChangeProfileModalVisible] = useState(false);
+  const [PropToChange, setPropToChange] = useState("");
+  const [ModalIcon, setModalIcon] = useState("");
+  const [isPassword, setIsPassword] = useState(false);
 
+  // Change profile picture
   const onChangePicture = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
-    console.log('ImagePicker result: ', result);
+    console.log("ImagePicker result: ", result);
 
     if (result.assets && result.assets.length > 0) {
       const source = { uri: result.assets[0].uri };
-      console.log('Selected image URI: ', source.uri);
+      console.log("Selected image URI: ", source.uri);
       // Aquí se debe enviar la imagen al servidor =)
-      
     } else {
-      console.log('No image selected');
+      console.log("No image selected");
     }
+  };
+
+  // Change profile
+  const openModal = (id) => {
+    console.log("openModal called with id:", id);
+    if (id === "password") {
+      setPropToChange("password");
+      setModalIcon("lock-closed-outline");
+      setIsPassword(true);
+    } else if (id === "username") {
+      setPropToChange("username");
+      setModalIcon("person-outline");
+      setIsPassword(false);
+    } else if (id === "email") {
+      setPropToChange("email");
+      setModalIcon("mail-outline");
+      setIsPassword(false);
+    }
+    setChangeProfileModalVisible(true);
+    console.log("ChangeProfileModalVisible set to true");
+  };
+
+  const animation = useRef(new Animated.Value(0)).current;
+
+  const handlePress = (id) => {
+    if (!isAnimated || activePressable !== id) {
+      setActivePressable(id);
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }).start(() => setIsAnimated(true));
+    }
+  };
+
+  const handlePressOut = (id) => {
+    console.log("handlePressOut called with id:", id);
+    if (!isMoved) {
+      openModal(id);
+    }
+    handleOutsidePress();
+    setIsMoved(false);
+  };
+
+  const handleMove = () => {
+    setIsMoved(true);
+  };
+
+  const handleOutsidePress = () => {
+    if (isAnimated) {
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }).start(() => setIsAnimated(false));
+    }
+  };
+  const setModalVisibility = (value) => {
+    setChangeProfileModalVisible(value);
+    handleOutsidePress();
+  };
+  const animatedStyle = {
+    backgroundColor: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["rgba(0, 0, 0, 0)", "rgba(211, 211, 211, 0.1)"],
+    }),
+    width: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0%", "100%"],
+    }),
+    left: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["50%", "0%"],
+    }),
+    right: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["50%", "0%"],
+    }),
   };
 
   return (
@@ -39,60 +127,78 @@ const ProfileSettings = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={tw`w-full flex items-center justify-center px-5 gap-5 `}>
+        <View style={tw`w-full flex items-center justify-center gap-5`}>
           {/* User name */}
-          <View style={tw`w-full flex flex-col items-start`}>
-            <View style={tw`w-full flex flex-row items-center `}>
+          <Pressable
+            onPressIn={() => handlePress("username")}
+            onPressOut={() => handlePressOut("username")}
+            onPressMove={handleMove}
+            style={tw`w-full flex flex-col items-start px-1`}>
+            <View style={tw`w-full flex flex-row items-center`}>
               <View style={tw`w-[10%] flex items-center`}>
                 <Ionicons name="person-outline" size={20} color={textColor} />
               </View>
-              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2 `}>
+              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2`}>
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
-                    <Text style={tw`text-[${textColor}] mb-1`}>User name</Text>
-                    <Text style={tw`text-[${textColor}]`}>User name</Text>
+                    <Text style={tw`text-[${disabledText}] mb-1`}>User name</Text>
+                    <Text style={tw`text-[${textColor}]`}>Username</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
               </View>
             </View>
-          </View>
+            {activePressable === "username" && <Animated.View style={[tw`absolute left-0 top-0 bottom-0`, animatedStyle]} />}
+          </Pressable>
           {/* Email */}
-          <View style={tw`w-full flex flex-col items-start`}>
-            <View style={tw`w-full flex flex-row items-center `}>
+          <Pressable
+            onPressIn={() => handlePress("email")}
+            onPressOut={() => handlePressOut("email")}
+            onPressMove={handleMove}
+            style={tw`w-full flex flex-col items-start px-1`}>
+            <View style={tw`w-full flex flex-row items-center`}>
               <View style={tw`w-[10%] flex items-center`}>
                 <Ionicons name="mail-outline" size={20} color={textColor} />
               </View>
-              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2 `}>
+              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2`}>
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
-                    <Text style={tw`text-[${textColor}] mb-1`}>Email</Text>
-                    <Text style={tw`text-[${textColor}]`}>Email</Text>
+                    <Text style={tw`text-[${disabledText}] mb-1`}>Email</Text>
+                    <Text style={tw`text-[${textColor}]`}>userEmail</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
               </View>
             </View>
-          </View>
+            {activePressable === "email" && <Animated.View style={[tw`absolute left-0 top-0 bottom-0`, animatedStyle]} />}
+          </Pressable>
           {/* Password */}
-          <View style={tw`w-full flex flex-col items-start`}>
-            <View style={tw`w-full flex flex-row items-center `}>
+          <Pressable
+            onPressIn={() => handlePress("password")}
+            onPressOut={() => handlePressOut("password")}
+            onPressMove={handleMove}
+            style={tw`w-full flex flex-col items-start px-1`}>
+            <View style={tw`w-full flex flex-row items-center`}>
               <View style={tw`w-[10%] flex items-center`}>
-                <Ionicons name="key-outline" size={20} color={textColor} />
+                <Ionicons name="lock-closed-outline" size={20} color={textColor} />
               </View>
-              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2 `}>
+              <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2`}>
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
-                    <Text style={tw`text-[${textColor}] mb-1`}>Password</Text>
-                    <Text style={tw`text-[${textColor}]`}>Password</Text>
+                    <Text style={tw`text-[${disabledText}] mb-1`}>Password</Text>
+                    <Text style={tw`text-[${textColor}]`}>userPassword</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
-
               </View>
             </View>
-          </View>
+            {activePressable === "password" && <Animated.View style={[tw`absolute left-0 top-0 bottom-0`, animatedStyle]} />}
+          </Pressable>
         </View>
+        {/* ChangeProfileModal */}
+        {ChangeProfileModalVisible && (
+          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} />
+        )}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
