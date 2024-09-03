@@ -164,7 +164,16 @@ const LoginRegister = ({ LoginScreen }) => {
             setLoginScreenState(true);
           }).catch((err) => {
             console.log(err);
-            // Handle registration errors (e.g., duplicate email) here
+            if (!(err.response && err.response.data)) {
+              setFormError('Registration failed. Please try again.');
+            } else {
+              const errorMessage = err.response.data;
+              if (errorMessage.includes('Username already exists') || errorMessage.includes('Email already exists')) {
+                setFormError(err.response.data);
+              } else {
+                setFormError('Registration failed. Please try again.');
+              }
+            }
           });
       }
     }
@@ -180,7 +189,7 @@ const LoginRegister = ({ LoginScreen }) => {
 
   return (
     <View style={tw`flex-1 w-full items-center justify-center bg-[${backgroundColor}]`}>
-      <Text style={[tw`mb-10 font-bold text-[${textColor}]`, styles.text]}>{LoginScreenState ? "Log in" : "Register"}</Text>
+      <Text style={[tw`mb-10 font-bold text-[${textColor}]`, styles.text]}>{LoginScreenState ? "Sign in" : "Sign up"}</Text>
 
       {/* UserName */}
       <View style={tw`w-4/5 my-3`}>
@@ -259,7 +268,7 @@ const LoginRegister = ({ LoginScreen }) => {
         onPress={handleSumbit}
       >
         <Text style={isPressed ? styles.textPressed : styles.textNotPressed}>
-          {LoginScreenState ? "Log in" : "Register"}
+          {LoginScreenState ? "Sign in" : "Sign up"}
         </Text>
       </TouchableOpacity>
 
@@ -268,10 +277,10 @@ const LoginRegister = ({ LoginScreen }) => {
         <Text style={tw`text-gray-500`}>Forgot Password?</Text>
       </TouchableOpacity>
 
-      {/* Log in or Sign up */}
+      {/* Sign in or Sign up */}
       <TouchableOpacity style={tw`mt-2`}>
         <Text style={tw`text-blue-500`} onPress={() => { setLoginScreenState(!LoginScreenState); setBadLogin(false); setFormError(''); }}>
-          {LoginScreenState ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+          {LoginScreenState ? "Don't have an account? Sign Up" : "Already have an account? Sign in"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -287,11 +296,11 @@ const styles = StyleSheet.create({
     borderBottomColor: 'white',
     backgroundColor: 'transparent',
     width: '40%',
-    
-    
+
+
   },
   buttonPressed: {
-   
+
     backgroundColor: 'white',
     borderRadius: 3,
     shadowColor: '#ffff',
@@ -303,10 +312,10 @@ const styles = StyleSheet.create({
     elevation: 30,
     borderWidth: 1,
     borderColor: 'black'
-    
 
-    
-    
+
+
+
   },
   textNotPressed: {
     color: 'white',

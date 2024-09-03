@@ -9,13 +9,13 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
 
-  const GoLoginScreen = (register) => {
+  const GoLoginScreen = (Signup) => {
     SetFirstScreen(false);
-    SetLoginScreenState(!register);
-    console.log('FirstScreen --> SetLoginScreenState', !register);
+    SetLoginScreenState(!Signup);
+    console.log('FirstScreen --> SetLoginScreenState', !Signup);
   };
 
-  // Estados animados para los botones de Login y Register
+  // Estados animados para los botones de Login y Sign up
   const animatedValueLogin = useRef(new Animated.Value(1)).current;
   const animatedValueRegister = useRef(new Animated.Value(1)).current;
 
@@ -202,11 +202,11 @@ const FirstScreen = ({ SetFirstScreen, SetLoginScreenState }) => {
               pressed && styles.btnPressed,
             ]}
             onPress={() => GoLoginScreen(true)}
-            onPressIn={() => handlePressIn('register')}
-            onPressOut={() => handlePressOut('register')}
+            onPressIn={() => handlePressIn('Sign up')}
+            onPressOut={() => handlePressOut('Sign up')}
           >
             <Animated.View style={[styles.btnBackground, animatedBackgroundStyleRegister]} />
-            <Text style={[tw`text-white`, styles.btnText]}>Register</Text>
+            <Text style={[tw`text-white`, styles.btnText]}>Sign up</Text>
             <Animated.View style={[styles.underline, animatedBorderStyleRegister]} />
           </Pressable>
         </Animated.View>

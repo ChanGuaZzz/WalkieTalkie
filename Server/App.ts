@@ -15,13 +15,13 @@ const io = new Server(server, {
 });
 
 const sequelize = new Sequelize({
-  database: 'walkietalkie', // Replace with your database name
-  username: 'root', // Replace with your database username
-  password: '', // Replace with your database password, if any
+  database: 'walkietalkie',
+  username: 'root',
+  password: '',
   host: 'localhost',
-  port: 3306, // Default MySQL port
-  dialect: 'mysql', // Tell Sequelize which database dialect to use
-  logging: false, // Disable logging; set to console.log to enable logging
+  port: 3306,
+  dialect: 'mysql',
+  logging: false,
 });
 
 app.use(
@@ -94,7 +94,7 @@ class Rooms extends Model {
   declare name: string;
 }
 
-Rooms.init( 
+Rooms.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -169,11 +169,27 @@ app.post('/create-user', async (req, res) => {
       password: hashedPassword,
     });
 
-    console.log(`User created successfully:`, newUser);
+    console.log('User created successfully:', newUser);
     res.status(201).send('User created successfully.');
-  } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).send('Failed to create user.');
+  } catch (error: any) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const errorMessage = error.errors
+        .map((err: any) => {
+          if (err.path === 'username') {
+            return 'Username already exists.';
+          } else if (err.path === 'email') {
+            return 'Email already exists.';
+          }
+          return 'Unique constraint error.';
+        })
+        .join(' ');
+
+      console.error('Unique constraint error:', error);
+      res.status(400).send(errorMessage);
+    } else {
+      console.error('Error creating user:', error);
+      res.status(500).send('Failed to create user.');
+    }
   }
 });
 
@@ -275,15 +291,14 @@ app.post('/searchRoom', async (req, res) => {
         },
       ],
     },
-  }); 
+  });
 
   if (rooms.length > 0) {
     res.status(200).send(rooms); // Send back the list of matching rooms
   } else {
     res.status(404).send('No rooms found');
   }
-}
-);
+});
 // =================================================================
 // =================================================================Search User=================================================================
 app.post('/searchUser', async (req, res) => {
@@ -397,7 +412,6 @@ io.on('connection', (socket: Socket) => {
     console.log('Usuarios conectadossssssssssssssss:', connectedUsers);
   }
 
-  
   // =================================================================
   // *Socket Join room*
   // =================================================================
@@ -421,9 +435,10 @@ io.on('connection', (socket: Socket) => {
       if (typeof groups === 'string') {
         groups = JSON.parse(groups);
       }
-    const newgroup = { name: room };
-      
-      if (!groups.some((g: any) => g.name === newgroup.name)) {// se verifica si el grupo ya esta en la lista
+      const newgroup = { name: room };
+
+      if (!groups.some((g: any) => g.name === newgroup.name)) {
+        // se verifica si el grupo ya esta en la lista
         groups.push(newgroup);
         user.setgroups(groups);
         user
@@ -440,9 +455,7 @@ io.on('connection', (socket: Socket) => {
       }
     }
     // }
-    socket
-      .to(room)
-      .emit('notification', `${user ? user.username : 'null'} has entered the room.`);
+    socket.to(room).emit('notification', `${user ? user.username : 'null'} has entered the room.`);
     console.log(`${user ? user.username : 'null'} joined room: ${room}`);
   });
   // ======================*END Socket JOIN*===================
@@ -460,7 +473,6 @@ io.on('connection', (socket: Socket) => {
     }
   });
   // ======================*END Socket send request*===================
-
 
   // =================================================================
   // *Socket Accept Request*
@@ -551,7 +563,8 @@ io.on('connection', (socket: Socket) => {
 
 //==== fin solicitudes de amistad ===================================
 
-const initialRooms = [// se crean las salas iniciales
+const initialRooms = [
+  // se crean las salas iniciales
   { name: 'ChatterBox Central' },
   { name: 'Whispering Pines' },
   { name: 'Echo Chamber' },
@@ -622,13 +635,11 @@ const initialRooms = [// se crean las salas iniciales
   { name: 'Transmission Station' },
   { name: 'Talkwave Terrace' },
   { name: 'The Sonic Sphere' },
-  { name: 'The Voice Vault' }
+  { name: 'The Voice Vault' },
 ];
 
- 
-
 sequelize.sync({ alter: true }).then(() => {
-  app.listen(3000,async () => {
+  app.listen(3000, async () => {
     console.log('Express Server running on port 3000');
     for (const room of initialRooms) {
       await Rooms.upsert(room);
