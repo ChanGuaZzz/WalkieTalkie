@@ -332,6 +332,48 @@ app.post('/searchUser', async (req, res) => {
     res.status(404).send('No users found');
   }
 });
+// =================================================================
+
+
+// =============================DELETE CONTACT====================================
+// app.post('/deleteContact', async (req, res) => {
+
+
+  // socket.on('join', async (data) => {
+  // const { username, contact } = data;
+  // const userA = await Users.findOne({
+  //   where: {
+  //     username: username,
+  //   },
+  // });
+  // const userB = await Users.findOne({
+  //   where: {
+  //     username: contact.name,
+  //   },
+  // });
+  //   if(userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null){ 
+  //   let contactsUserA = JSON.parse(userA.contacts);
+  //   let contactsUserB = JSON.parse(userB.contacts);
+  //   if (typeof contactsUserA === 'string') {
+  //     contactsUserA = JSON.parse(contactsUserA);
+  //     }
+  //   if (typeof contactsUserB === 'string') {
+  //     contactsUserB = JSON.parse(contactsUserB);
+  //     }
+  //   contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
+  //   contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
+  //   userA.setcontacts(contactsUserA);
+  //   userB.setcontacts(contactsUserB);
+  //   userA.save();
+  //   userB.save(); 
+  //   } 
+  //   else {
+  //   }
+  // });
+
+
+  // });
+
 
 // =================================================================
 // * Messages and socket.io*
@@ -447,6 +489,53 @@ io.on('connection', (socket: Socket) => {
   });
   // ======================*END Socket JOIN*===================
 
+// ============================*DeleteContact*=====================================
+
+  socket.on('deleteContact', async (data) => {
+  const { username, contact } = data;
+  const userA = await Users.findOne({
+    where: {
+      username: username,
+    },
+  });
+  const userB = await Users.findOne({
+    where: {
+      username: contact.name,
+    },
+  });
+  
+
+    if(userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null){ 
+    const senderSocketId = connectedUsers[userA.username];
+    const receiverSocketId = connectedUsers[userB.username];
+
+
+    let contactsUserA = JSON.parse(userA.contacts);
+    let contactsUserB = JSON.parse(userB.contacts);
+    if (typeof contactsUserA === 'string') {
+      contactsUserA = JSON.parse(contactsUserA);
+      }
+    if (typeof contactsUserB === 'string') {
+      contactsUserB = JSON.parse(contactsUserB);
+      }
+    contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
+    contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
+    userA.setcontacts(contactsUserA);
+    userB.setcontacts(contactsUserB);
+    userA.save();
+    userB.save(); 
+    console.log('Contacto eliminado');
+    io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
+    io.to(senderSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
+    } 
+    else {
+      console.log('No se encontro el contacto');
+    }
+  });
+
+
+
+  
   // =================================================================
   // *Socket send request*
   // =================================================================

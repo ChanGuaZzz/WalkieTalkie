@@ -74,7 +74,7 @@ export default function TabTwoScreen() {
         <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No there contacts...</Text>
         :
         contacts.map((contact, index) => (
-          <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} icon='mic' />
+          <ChatComponent user={contact} key={index} onPress={() => navigation.navigate('ChatRoom', { user: contact })} iscontact={true} icon='mic' />
         ))
       }
 
