@@ -81,7 +81,7 @@ export default function TabTwoScreen() {
             }
 
             return (
-            <ChatComponent user={roomdata} key={index} onPress={() => navigation.navigate('ChatRoom', { user: roomdata })} icon='mic' />
+            <ChatComponent user={roomdata} key={index} onPress={() => navigation.navigate('ChatRoom', { user: roomdata })} iscontact={false} icon='mic' />
             )
         })
           
