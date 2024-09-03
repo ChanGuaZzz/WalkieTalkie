@@ -430,6 +430,7 @@ io.on('connection', (socket: Socket) => {
           .save()
           .then(() => {
             console.log('Los cambios han sido guardados exitosamente.');
+            socket.emit('refreshgroups'); // se envia la señal para que se actualicen los grupos en tiempo real
           })
           .catch((error) => {
             console.error('Error al guardar los cambios: ', error);
