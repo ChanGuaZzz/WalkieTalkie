@@ -69,9 +69,7 @@ class Users extends Model {
   // Method to check the password against the hashed password
   checkPassword(password: string): boolean {
     const result = bcrypt.compareSync(password, this.password);
-    console.log(
-      `Checking password for ${this.username}: ${result} - ${this.password} - ${password}`
-    ); // Debug print
+    console.log(`Checking password for ${this.username}: ${result} - ${this.password} - ${password}`); // Debug print
     return result;
   }
 
@@ -195,7 +193,7 @@ app.post('/create-user', async (req, res) => {
 
 app.post('/update-user', async (req, res) => {
   const { PropToChange, userID, newProp } = req.body;
-  console.log('userID', userID)
+  console.log('userID', userID);
   try {
     const user = await Users.findOne({ where: { id: userID } });
 
@@ -282,14 +280,11 @@ app.post('/logout', (req, res) => {
 });
 // =================================================================Search Room=================================================================
 app.post('/searchRoom', async (req, res) => {
-  const { roomsearch, username } = req.body;
+  const { roomsearch, userID } = req.body;
   console.log('server room: ' + roomsearch);
 
-  const user = await Users.findOne({
-    where: {
-      username: username,
-    },
-  });
+  const user = await Users.findOne({ where: { id: userID } });
+
   let groupsofuser = [];
   let groupsofuserDB;
 
@@ -329,15 +324,12 @@ app.post('/searchRoom', async (req, res) => {
 // =================================================================
 // =================================================================Search User=================================================================
 app.post('/searchUser', async (req, res) => {
-  const { usernamesearch, username } = req.body;
+  const { usernamesearch, userID } = req.body;
   console.log('server user: ' + usernamesearch);
 
   // Use the Op.like operator to search for usernames that contain the search string
-  const user = await Users.findOne({
-    where: {
-      username: username,
-    },
-  });
+  const user = await Users.findOne({ where: { id: userID } });
+
   let contactsofuser = [];
   let contactsofuserDB;
 
@@ -350,28 +342,28 @@ app.post('/searchUser', async (req, res) => {
   }
 
   contactsofuser = contactsofuserDB.map((contact: any) => contact.username); // se obtienen los nombres de los contactos del usuario
-
-  const users = await Users.findAll({
-    where: {
-      [Op.and]: [
-        {
-          username: {
-            [Op.like]: `%${usernamesearch}%`, // This will match any username that contains the search string
+  if (user && user !== null) {
+    const users = await Users.findAll({
+      where: {
+        [Op.and]: [
+          {
+            username: {
+              [Op.like]: `%${usernamesearch}%`, // This will match any username that contains the search string
+            },
           },
-        },
-        {
-          username: {
-            [Op.notIn]: [username, ...contactsofuser], // This will exclude the username provided and those in contactsofuser
+          {
+            username: {
+              [Op.notIn]: [user.username, ...contactsofuser], // This will exclude the username provided and those in contactsofuser
+            },
           },
-        },
-      ],
-    },
-  });
-
-  if (users.length > 0) {
-    res.status(200).send(users); // Send back the list of matching users
-  } else {
-    res.status(404).send('No users found');
+        ],
+      },
+    });
+    if (users.length > 0) {
+      res.status(200).send(users); // Send back the list of matching users
+    } else {
+      res.status(404).send('No users found');
+    }
   }
 });
 
@@ -451,11 +443,8 @@ io.on('connection', (socket: Socket) => {
     console.log('Username:', data.username);
 
     // if(!forContacts){
-    const user = await Users.findOne({
-      where: {
-        username: data.username,
-      },
-    });
+    const user = await Users.findOne({ where: { id: data.userID } });
+
     if (user && user.groups) {
       let groups = JSON.parse(user.groups);
 
@@ -490,26 +479,16 @@ io.on('connection', (socket: Socket) => {
   // ============================= DELETE CONTACT ====================================
 
   socket.on('deleteContact', async (data) => {
-    const { username, contact } = data;
-    const userA = await Users.findOne({
-      where: {
-        username: username,
-      },
-    });
+    const { userID, contact } = data;
+    const userA = await Users.findOne({ where: { id: userID } });
+    //geyson
     const userB = await Users.findOne({
       where: {
         username: contact.name,
       },
     });
 
-    if (
-      userA &&
-      userA !== null &&
-      userA.contacts !== null &&
-      userB &&
-      userB !== null &&
-      userB.contacts !== null
-    ) {
+    if (userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null) {
       const senderSocketId = connectedUsers[userA.username];
       const receiverSocketId = connectedUsers[userB.username];
 
@@ -521,12 +500,8 @@ io.on('connection', (socket: Socket) => {
       if (typeof contactsUserB === 'string') {
         contactsUserB = JSON.parse(contactsUserB);
       }
-      contactsUserA = contactsUserA.filter(
-        (contactuserA: any) => contactuserA.room !== contact.room
-      );
-      contactsUserB = contactsUserB.filter(
-        (contactuserB: any) => contactuserB.room !== contact.room
-      );
+      contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
+      contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
       userA.setcontacts(contactsUserA);
       userB.setcontacts(contactsUserB);
       userA.save();
