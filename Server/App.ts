@@ -550,9 +550,89 @@ io.on('connection', (socket: Socket) => {
 // =================================================================
 
 //==== fin solicitudes de amistad ===================================
+
+const initialRooms = [// se crean las salas iniciales
+  { name: 'ChatterBox Central' },
+  { name: 'Whispering Pines' },
+  { name: 'Echo Chamber' },
+  { name: 'The Roaring Room' },
+  { name: 'Vibe Tribe' },
+  { name: 'The Sound Wave' },
+  { name: 'Talk & Roll' },
+  { name: 'The Hangout Spot' },
+  { name: 'Buzzing Beehive' },
+  { name: 'Chatty Café' },
+  { name: 'Frequency Friends' },
+  { name: 'The Social Hub' },
+  { name: 'Echo Base' },
+  { name: 'Radio Rebels' },
+  { name: 'Loud & Clear' },
+  { name: 'Wavelength Warriors' },
+  { name: 'Chit Chat Lounge' },
+  { name: 'The Pulse Room' },
+  { name: 'Connection Corner' },
+  { name: 'Signal Station' },
+  { name: 'The Banter Box' },
+  { name: 'The Talk Deck' },
+  { name: 'Airwave Alley' },
+  { name: 'Chat Circuit' },
+  { name: 'SpeakEasy Lounge' },
+  { name: 'Harmony Haven' },
+  { name: 'The Chatter Zone' },
+  { name: 'The Conversation Club' },
+  { name: 'Infinite Frequencies' },
+  { name: 'WalkieTalkie Plaza' },
+  { name: 'Talk Town' },
+  { name: 'Comm Link Café' },
+  { name: 'Noise Nest' },
+  { name: 'Vocal Vortex' },
+  { name: 'Radio Roundtable' },
+  { name: 'The Echo Lounge' },
+  { name: 'The Voice Vault' },
+  { name: 'Chit Chat Chamber' },
+  { name: 'The Speak Spot' },
+  { name: 'Talk Tunnel' },
+  { name: 'The Sound Hub' },
+  { name: 'Vocal Valley' },
+  { name: 'Waveform Workshop' },
+  { name: 'Mic Masters' },
+  { name: 'Talk Together' },
+  { name: 'Resonance Room' },
+  { name: 'Broadcast Bunker' },
+  { name: 'The Gab Garage' },
+  { name: 'The Signal Shack' },
+  { name: 'The Wave Room' },
+  { name: 'Chatter Cave' },
+  { name: 'Transmit Tavern' },
+  { name: 'Radio Ranch' },
+  { name: 'The Dial Den' },
+  { name: 'The Talk Tower' },
+  { name: 'Echo Escape' },
+  { name: 'Chat Commune' },
+  { name: 'The Transmission Terminal' },
+  { name: 'The Voiceover' },
+  { name: 'The Walkie World' },
+  { name: 'Chatterbox Crew' },
+  { name: 'Vibe Lounge' },
+  { name: 'Radio Refuge' },
+  { name: 'Buzz Room' },
+  { name: 'Talk Temple' },
+  { name: 'Echo Enclave' },
+  { name: 'The Conversation Station' },
+  { name: 'Transmission Station' },
+  { name: 'Talkwave Terrace' },
+  { name: 'The Sonic Sphere' },
+  { name: 'The Voice Vault' }
+];
+
+ 
+
 sequelize.sync({ alter: true }).then(() => {
-  app.listen(3000, () => {
+  app.listen(3000,async () => {
     console.log('Express Server running on port 3000');
+    for (const room of initialRooms) {
+      await Rooms.upsert(room);
+    }
   });
   server.listen(3001, () => {
     console.log('Socket.io Server running on port 3001');
