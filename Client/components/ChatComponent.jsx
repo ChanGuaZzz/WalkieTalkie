@@ -46,7 +46,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
   }
 
   const onAccept = () => {
-    socket.emit('acceptRequest', { username: username, contact: user });
+    socket.emit('acceptRequest', { username: username, contact: user.name });
     console.log('Friend added', user.room);
     Vibration.vibrate(50);
   }
