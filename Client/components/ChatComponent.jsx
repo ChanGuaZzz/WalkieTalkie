@@ -44,13 +44,14 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
   const onAccept = () => {
     socket.emit('accept_request', { senderId: user.username , receiverId: username });
     console.log('Friend added', user.room);
-    Vibration.vibrate(50);
+    Vibration.vibrate(100);
   }
 
   const onDecline = () => {
-    socket.emit('declineRequest', { username: username, contact: user });
-    console.log('Friend declined', user.room);
-    Vibration.vibrate(50);
+    console.log('Solicitud rechazada de:', user.username);
+    socket.emit('decline_request', { senderId: user.username, receiverId: username });
+    Vibration.vibrate(100);
+
   }
   return (
     <TouchableOpacity onPress={onPress} style={tw`${isrequest?"px-4 py-2":"p-2"} border-b border-zinc-800 flex flex-row w-full max-w-[700px] justify-center items-center`}>

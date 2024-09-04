@@ -49,7 +49,7 @@ const RequestIcon = ({ handleLogout }) => {
 
   useEffect(() => {
     console.log('REQUESTS ACTUALIZADAS', requests);
-    
+
   }, [requests]);
 
 
@@ -81,13 +81,13 @@ const RequestIcon = ({ handleLogout }) => {
             {requests.length > 0 ? (
               console.log('REQUESTS EN EL MAP', requests),
               requests.map((request, index) => (
-                
+
                 <ChatComponent user={request} key={index} isrequest={true} icon='mic' />
 
               )))
               :
               <View style={tw`flex-1 items-center justify-center`}>
-                <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No new requests...</Text> 
+                <Text style={tw`text-[${textColor}] text-2xl  mt-10 font-medium`}>No new requests...</Text>
               </View>
 
             }

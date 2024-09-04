@@ -7,12 +7,13 @@ import { useThemeColor } from '../../hooks/useThemeColor';
 import axios from 'axios';
 import getEnvVars from '../../config';
 import { useSocket } from '../../components/context/SocketContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const Index = () => {
   const backgroundColor = useThemeColor({}, 'background');
   const textColor = useThemeColor({}, 'text');
   const [currentRoom, setCurrentRoom] = useState(null);
-  const [recentRooms,setRecentRooms] = useState(['FakeRoomRecent']);
+  const [recentRooms, setRecentRooms] = useState(['FakeRoomRecent']);
   const [userID, setUserID] = useState();
   const [username, setUsername] = useState();
   const { SERVER_URL } = getEnvVars();
@@ -41,7 +42,13 @@ const Index = () => {
     socket.emit('accept_request', { senderId: senderId, receiverId: username });
     setModalVisible(!modalVisible);
   }
- 
+
+  const declineRequest = (senderId) => {
+    console.log('Solicitud rechazada de:', senderId);
+    socket.emit('decline_request', { senderId: senderId, receiverId: username });
+    setModalVisible(!modalVisible);
+  }
+
 
 
   return (
@@ -56,13 +63,15 @@ const Index = () => {
       >
         <View style={tw`flex-1 justify-center items-center`}>
           <View style={tw`bg-slate-400 shadow-2xl rounded-3xl p-10 items-center `}>
+            <Ionicons name="close" size={24} color="black" style={tw`absolute top-0 right-0 m-2`} onPress={() => setModalVisible(!modalVisible)} />
+
             <Text style={tw`text-2xl font-bold`}>@{request.senderId} </Text>
             <Text style={tw`text-lg font-semibold`}>Te ha enviado una solicitud</Text>
             <Text >"{request.message}"</Text>
             <View style={tw`flex flex-row`}>
               <TouchableOpacity
                 style={tw`rounded-full bg-red-500 p-2 m-1`}
-                onPress={() => setModalVisible(!modalVisible)}
+                onPress={() => declineRequest(request.senderId)}
               >
                 <Text style={tw`text-white font-bold`}> Decline </Text>
               </TouchableOpacity>

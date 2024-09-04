@@ -507,6 +507,37 @@ io.on('connection', (socket: Socket) => {
   });
   // ======================*END Socket JOIN*===================
 
+  // ==========================DECLAIN REQUEST=======================================
+  socket.on('decline_request', async (data: { senderId: string; receiverId: string }) => {
+    const { senderId, receiverId } = data;
+    const receiverSocketId = connectedUsers[receiverId];
+    console.log('Entra a DECLINE REQUEST');
+    const userReceiver = await Users.findOne({
+      where: {
+        username: receiverId,
+      },
+    });
+
+    if (userReceiver && userReceiver !== null && userReceiver.requests !== null) {
+      let requestsReceiver = JSON.parse(userReceiver.requests);
+
+      if (typeof requestsReceiver === 'string') {
+        requestsReceiver = JSON.parse(requestsReceiver);
+      }
+      console.log('requestsReceiver:', requestsReceiver);
+      const updatedRequests = requestsReceiver.filter((r: any) => r.username !== senderId);
+      console.log('updatedRequests:', updatedRequests, 'el que envio fue:', senderId);
+      userReceiver.setrequests(updatedRequests);
+      userReceiver.save().then(() => {
+        console.log('La solicitud ha sido eliminada exitosamente.');
+        io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen las solicitudes en tiempo real
+      });
+    } else {
+      console.log('No se encontro el usuario');
+    }
+  });
+  //===================================================================
+
   // ============================= DELETE CONTACT ====================================
 
   socket.on('deleteContact', async (data) => {
