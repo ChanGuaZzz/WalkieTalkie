@@ -574,22 +574,23 @@ io.on('connection', (socket: Socket) => {
           }
           const newrequest = { username: senderId, profile: userB.profilePicture };
           if (!requestsA.some((r: any) => r.username === newrequest.username)) {
+            if (receiverSocketId) {
+              io.to(receiverSocketId).emit('receive_request', { senderId });
+              console.log(`Solicitud enviada de ${senderId} a ${receiverId}`);
+            }
             // se verifica si la solicitud ya esta en la lista
             requestsA.push(newrequest);
             userA.setrequests(requestsA);
             userA.save().then(() => {
               console.log('La solicitud ha sido guardada exitosamente.');
-              io.to(receiverSocketId).emit('refreshrequests'); // se envia la señal para que se actualicen las solicitudes en tiempo real
+              io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen las solicitudes en tiempo real
             });
           } else {
             console.log('Ya esta en las solicitudes');
           }
     }
 
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('receive_request', { senderId });
-      console.log(`Solicitud enviada de ${senderId} a ${receiverId}`);
-    }
+    
   });
   // ======================*END Socket send request*===================
 
