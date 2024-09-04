@@ -45,11 +45,12 @@ app.use(
   })
 );
 // =================================================================
-// * Users and Login *
+// * Users *
 // =================================================================
 class Users extends Model {
   declare id: number;
   declare username: string;
+  declare info: string;
   declare email: string;
   declare password: string;
   declare groups: string;
@@ -62,57 +63,27 @@ class Users extends Model {
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
     this.password = hashedPassword;
   }
-  // Example for updating a user's password
-  // newUser.setPassword(newPlainTextPassword); // Hashes the new password and sets it
-  // await newUser.save(); // Persists the change to the database
 
   // Method to check the password against the hashed password
   checkPassword(password: string): boolean {
     const result = bcrypt.compareSync(password, this.password);
-    console.log(
-      `Checking password for ${this.username}: ${result} - ${this.password} - ${password}`
-    ); // Debug print
+    console.log(`Checking password for ${this.username}: ${result} - ${this.password} - ${password}`); // Debug print
     return result;
   }
 
+  // Method to set the groups, stringifies groups and sets the groups
   setgroups(groups: object): void {
     this.groups = JSON.stringify(groups);
   }
-
+  // Method to set the contacts, stringifies contacts and sets the contacts
   setcontacts(contacts: object): void {
     this.contacts = JSON.stringify(contacts);
   }
 
-  // TypeScript representation of Python's __repr__ method
   toString(): string {
     return `<Users ${this.username}>`;
   }
 }
-
-class Rooms extends Model {
-  declare id: number;
-  declare name: string;
-}
-
-Rooms.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING(50),
-      unique: true,
-      allowNull: false,
-    },
-  },
-  {
-    sequelize, // This is the sequelize instance
-    modelName: 'Rooms',
-    // Other model options go here
-  }
-);
 
 Users.init(
   {
@@ -125,6 +96,10 @@ Users.init(
       type: DataTypes.STRING(50),
       unique: true,
       allowNull: false,
+    },
+    info: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING(100),
@@ -154,7 +129,42 @@ Users.init(
     // Other model options go here
   }
 );
+// =================================================================
+// * Rooms *
+// =================================================================
+class Rooms extends Model {
+  declare id: number;
+  declare name: string;
+  declare info: string;
+}
 
+Rooms.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING(50),
+      unique: true,
+      allowNull: false,
+    },
+    info: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+  },
+  {
+    sequelize, // This is the sequelize instance
+    modelName: 'Rooms',
+    // Other model options go here
+  }
+);
+
+// =================================================================
+// * Login *
+// =================================================================
 app.post('/create-user', async (req, res) => {
   const userData = {
     username: req.body.username,
@@ -195,10 +205,8 @@ app.post('/create-user', async (req, res) => {
 
 app.post('/update-user', async (req, res) => {
   const { PropToChange, userID, newProp } = req.body;
-  console.log('userID', userID)
   try {
     const user = await Users.findOne({ where: { id: userID } });
-
     if (!user) {
       return res.status(404).send('User not found.');
     }
@@ -207,8 +215,8 @@ app.post('/update-user', async (req, res) => {
       user.setPassword(newProp);
     } else if (PropToChange === 'email') {
       user.email = newProp;
-    } else if (PropToChange === 'username') {
-      user.username = newProp;
+    } else if (PropToChange === 'info') {
+      user.info = newProp;
     } else {
       return res.status(400).send('Invalid property to change.');
     }
@@ -502,14 +510,7 @@ io.on('connection', (socket: Socket) => {
       },
     });
 
-    if (
-      userA &&
-      userA !== null &&
-      userA.contacts !== null &&
-      userB &&
-      userB !== null &&
-      userB.contacts !== null
-    ) {
+    if (userA && userA !== null && userA.contacts !== null && userB && userB !== null && userB.contacts !== null) {
       const senderSocketId = connectedUsers[userA.username];
       const receiverSocketId = connectedUsers[userB.username];
 
@@ -521,12 +522,8 @@ io.on('connection', (socket: Socket) => {
       if (typeof contactsUserB === 'string') {
         contactsUserB = JSON.parse(contactsUserB);
       }
-      contactsUserA = contactsUserA.filter(
-        (contactuserA: any) => contactuserA.room !== contact.room
-      );
-      contactsUserB = contactsUserB.filter(
-        (contactuserB: any) => contactuserB.room !== contact.room
-      );
+      contactsUserA = contactsUserA.filter((contactuserA: any) => contactuserA.room !== contact.room);
+      contactsUserB = contactsUserB.filter((contactuserB: any) => contactuserB.room !== contact.room);
       userA.setcontacts(contactsUserA);
       userB.setcontacts(contactsUserB);
       userA.save();
@@ -644,77 +641,77 @@ io.on('connection', (socket: Socket) => {
 
 const initialRooms = [
   // se crean las salas iniciales
-  { name: 'ChatterBox Central' },
-  { name: 'Whispering Pines' },
-  { name: 'Echo Chamber' },
-  { name: 'The Roaring Room' },
-  { name: 'Vibe Tribe' },
-  { name: 'The Sound Wave' },
-  { name: 'Talk & Roll' },
-  { name: 'The Hangout Spot' },
-  { name: 'Buzzing Beehive' },
-  { name: 'Chatty Café' },
-  { name: 'Frequency Friends' },
-  { name: 'The Social Hub' },
-  { name: 'Echo Base' },
-  { name: 'Radio Rebels' },
-  { name: 'Loud & Clear' },
-  { name: 'Wavelength Warriors' },
-  { name: 'Chit Chat Lounge' },
-  { name: 'The Pulse Room' },
-  { name: 'Connection Corner' },
-  { name: 'Signal Station' },
-  { name: 'The Banter Box' },
-  { name: 'The Talk Deck' },
-  { name: 'Airwave Alley' },
-  { name: 'Chat Circuit' },
-  { name: 'SpeakEasy Lounge' },
-  { name: 'Harmony Haven' },
-  { name: 'The Chatter Zone' },
-  { name: 'The Conversation Club' },
-  { name: 'Infinite Frequencies' },
-  { name: 'WalkieTalkie Plaza' },
-  { name: 'Talk Town' },
-  { name: 'Comm Link Café' },
-  { name: 'Noise Nest' },
-  { name: 'Vocal Vortex' },
-  { name: 'Radio Roundtable' },
-  { name: 'The Echo Lounge' },
-  { name: 'The Voice Vault' },
-  { name: 'Chit Chat Chamber' },
-  { name: 'The Speak Spot' },
-  { name: 'Talk Tunnel' },
-  { name: 'The Sound Hub' },
-  { name: 'Vocal Valley' },
-  { name: 'Waveform Workshop' },
-  { name: 'Mic Masters' },
-  { name: 'Talk Together' },
-  { name: 'Resonance Room' },
-  { name: 'Broadcast Bunker' },
-  { name: 'The Gab Garage' },
-  { name: 'The Signal Shack' },
-  { name: 'The Wave Room' },
-  { name: 'Chatter Cave' },
-  { name: 'Transmit Tavern' },
-  { name: 'Radio Ranch' },
-  { name: 'The Dial Den' },
-  { name: 'The Talk Tower' },
-  { name: 'Echo Escape' },
-  { name: 'Chat Commune' },
-  { name: 'The Transmission Terminal' },
-  { name: 'The Voiceover' },
-  { name: 'The Walkie World' },
-  { name: 'Chatterbox Crew' },
-  { name: 'Vibe Lounge' },
-  { name: 'Radio Refuge' },
-  { name: 'Buzz Room' },
-  { name: 'Talk Temple' },
-  { name: 'Echo Enclave' },
-  { name: 'The Conversation Station' },
-  { name: 'Transmission Station' },
-  { name: 'Talkwave Terrace' },
-  { name: 'The Sonic Sphere' },
-  { name: 'The Voice Vault' },
+  { name: 'ChatterBox Central', info: 'A lively place for all your chat needs.' },
+  { name: 'Whispering Pines', info: 'A serene spot for quiet conversations.' },
+  { name: 'Echo Chamber', info: 'Where your voice echoes through the room.' },
+  { name: 'The Roaring Room', info: 'A place for loud and energetic discussions.' },
+  { name: 'Vibe Tribe', info: 'Join the tribe and share the vibes.' },
+  { name: 'The Sound Wave', info: 'Ride the wave of sound and communication.' },
+  { name: 'Talk & Roll', info: 'Roll into conversations with ease.' },
+  { name: 'The Hangout Spot', info: 'The perfect spot to hang out and chat.' },
+  { name: 'Buzzing Beehive', info: 'A hive of buzzing conversations.' },
+  { name: 'Chatty Café', info: 'Grab a coffee and chat away.' },
+  { name: 'Frequency Friends', info: 'Tune in with friends on the same frequency.' },
+  { name: 'The Social Hub', info: 'The hub for all social interactions.' },
+  { name: 'Echo Base', info: 'A base for echoing thoughts and ideas.' },
+  { name: 'Radio Rebels', info: 'Rebel against silence with radio waves.' },
+  { name: 'Loud & Clear', info: 'Make your voice heard loud and clear.' },
+  { name: 'Wavelength Warriors', info: 'Warriors on the same wavelength.' },
+  { name: 'Chit Chat Lounge', info: 'Lounge around and chit chat.' },
+  { name: 'The Pulse Room', info: 'Feel the pulse of the conversation.' },
+  { name: 'Connection Corner', info: 'Connect with others in this corner.' },
+  { name: 'Signal Station', info: 'Send and receive signals of communication.' },
+  { name: 'The Banter Box', info: 'A box full of friendly banter.' },
+  { name: 'The Talk Deck', info: 'Decked out for all your talking needs.' },
+  { name: 'Airwave Alley', info: 'An alley of airwaves and conversations.' },
+  { name: 'Chat Circuit', info: 'Complete the circuit with your chats.' },
+  { name: 'SpeakEasy Lounge', info: 'Speak easy and relax in this lounge.' },
+  { name: 'Harmony Haven', info: 'A haven for harmonious conversations.' },
+  { name: 'The Chatter Zone', info: 'Enter the zone of endless chatter.' },
+  { name: 'The Conversation Club', info: 'Join the club and start conversing.' },
+  { name: 'Infinite Frequencies', info: 'Infinite frequencies for infinite talks.' },
+  { name: 'WalkieTalkie Plaza', info: 'A plaza for walkie-talkie enthusiasts.' },
+  { name: 'Talk Town', info: 'A town where talking never stops.' },
+  { name: 'Comm Link Café', info: 'Link up and communicate over coffee.' },
+  { name: 'Noise Nest', info: 'A nest of noise and lively discussions.' },
+  { name: 'Vocal Vortex', info: 'Get caught in the vortex of voices.' },
+  { name: 'Radio Roundtable', info: 'A roundtable for radio discussions.' },
+  { name: 'The Echo Lounge', info: 'Lounge around and hear the echoes.' },
+  { name: 'The Voice Vault', info: 'Vault your voice in this secure spot.' },
+  { name: 'Chit Chat Chamber', info: 'A chamber for endless chit chat.' },
+  { name: 'The Speak Spot', info: 'The spot for all your speaking needs.' },
+  { name: 'Talk Tunnel', info: 'A tunnel of continuous talk.' },
+  { name: 'The Sound Hub', info: 'The hub for all sound-related activities.' },
+  { name: 'Vocal Valley', info: 'A valley filled with vocal expressions.' },
+  { name: 'Waveform Workshop', info: 'Workshop your ideas in waveform.' },
+  { name: 'Mic Masters', info: 'Masters of the microphone gather here.' },
+  { name: 'Talk Together', info: 'Together we talk and share.' },
+  { name: 'Resonance Room', info: 'A room where your voice resonates.' },
+  { name: 'Broadcast Bunker', info: 'A bunker for broadcasting your thoughts.' },
+  { name: 'The Gab Garage', info: 'A garage full of gab and chatter.' },
+  { name: 'The Signal Shack', info: 'A shack for sending and receiving signals.' },
+  { name: 'The Wave Room', info: 'Ride the waves of conversation.' },
+  { name: 'Chatter Cave', info: 'A cave for all your chatter needs.' },
+  { name: 'Transmit Tavern', info: 'Transmit your thoughts in this tavern.' },
+  { name: 'Radio Ranch', info: 'A ranch for radio enthusiasts.' },
+  { name: 'The Dial Den', info: 'Dial into conversations in this den.' },
+  { name: 'The Talk Tower', info: 'Tower over conversations here.' },
+  { name: 'Echo Escape', info: 'Escape into the echoes of voices.' },
+  { name: 'Chat Commune', info: 'A commune for chat lovers.' },
+  { name: 'The Transmission Terminal', info: 'Terminal for all your transmissions.' },
+  { name: 'The Voiceover', info: 'Voice over your thoughts here.' },
+  { name: 'The Walkie World', info: 'A world for walkie-talkie users.' },
+  { name: 'Chatterbox Crew', info: 'Join the crew of chatterboxes.' },
+  { name: 'Vibe Lounge', info: 'Lounge around and catch the vibes.' },
+  { name: 'Radio Refuge', info: 'A refuge for radio conversations.' },
+  { name: 'Buzz Room', info: 'A room buzzing with activity.' },
+  { name: 'Talk Temple', info: 'A temple dedicated to talking.' },
+  { name: 'Echo Enclave', info: 'An enclave for echoing voices.' },
+  { name: 'The Conversation Station', info: 'Station for all your conversations.' },
+  { name: 'Transmission Station', info: 'Station for transmitting your thoughts.' },
+  { name: 'Talkwave Terrace', info: 'Terrace for talkwave enthusiasts.' },
+  { name: 'The Sonic Sphere', info: 'A sphere of sonic discussions.' },
+  { name: 'The Voice Vault', info: 'Vault your voice securely here.' },
 ];
 
 sequelize.sync({ alter: true }).then(() => {

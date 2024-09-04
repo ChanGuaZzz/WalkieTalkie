@@ -15,29 +15,25 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
   const [modalIconVisible, setModalIconVisible] = useState(false);
   const [username, setusername] = useState();
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
-  const [userID, setUserID] = useState(null)
-
+  const [userInfo, setUserInfo] = useState();
 
   useEffect(() => {
     axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
-        // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
-        .then((res) => { 
-          setusername(res.data.user.username); 
-          setUserID(res.data.user.id)
-           })
-        .catch((error) => { console.log(error) });
+      // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
+      .then((res) => {
+        setusername(res.data.user.username);
+        setUserInfo(res.data.user.info);
+      })
+      .catch((error) => { console.log(error) });
   }, []);
 
-  useEffect(() => {
-  }, [user]);
-
   const onClickButton = () => {
-    if(iscontact){
-     socket.emit('deleteContact', {username: username, contact: user });
+    if (iscontact) {
+      socket.emit('deleteContact', { username: username, contact: user });
       console.log('Friend deleted', user.room);
 
-    Vibration.vibrate(50);
-    }else{
+      Vibration.vibrate(50);
+    } else {
       console.log('group leaved');
       Vibration.vibrate(50);
     }
@@ -49,6 +45,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
         modalIconVisible={modalIconVisible}
         setModalIconVisible={setModalIconVisible}
         iconSize={14}
+        userInfo={userInfo}
       />
       <View style={tw`flex-1 flex-row items-center`}>
         <View style={tw`flex-1 flex-row items-center justify-between`}>

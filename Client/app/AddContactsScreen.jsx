@@ -42,6 +42,7 @@ export default function AddContactsScreen() {
         const usersData = res.data.map((user) => ({
           name: user.username,
           profile: user.image ? { uri: user.image } : emoGirlIcon,
+          info: user.info,
         }));
         setUsers(usersData);
         setUserFound(true);

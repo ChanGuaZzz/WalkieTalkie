@@ -78,7 +78,8 @@ export default function TabTwoScreen() {
             const roomdata = {
               name: room.name,
               profile: GroupIcon,
-              room: room.name
+              room: room.name,
+              info: room.info
             }
 
             return (

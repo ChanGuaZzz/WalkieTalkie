@@ -3,7 +3,10 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, Image, Text } from 'react-native';
 import tw from 'twrnc';
 import ProfileIcon from '../../assets/images/ProfileIcon.png';
+import { useThemeColor } from '../../hooks/useThemeColor';
 const UserProfileModal = ({ user, modalIconVisible, setModalIconVisible, iconSize }) => {
+  const textColor = useThemeColor({}, "text");
+
   return (
     <>
       <TouchableOpacity onPress={() => setModalIconVisible(true)}>
@@ -29,7 +32,8 @@ const UserProfileModal = ({ user, modalIconVisible, setModalIconVisible, iconSiz
             style={{ width: 300, height: 300, resizeMode: 'contain' }}
             source={user.profile ? user.profile : ProfileIcon}
           />
-          <Text style={tw`text-white text-lg font-bold text-center mt-1`}>{user.name}</Text>
+          <Text style={tw`text-[${textColor}] text-lg font-bold text-center mt-1 border-b border-t border-gray-400 w-full`}>{user.name}</Text>
+          <Text style={tw`text-[${textColor}] text-center mt-1 w-2/3`}>{user.info}</Text>
         </TouchableOpacity>
       </Modal>
     </>

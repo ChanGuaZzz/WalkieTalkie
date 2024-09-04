@@ -36,6 +36,7 @@ export default function TabTwoScreen() {
             name: contact.username,
             room: contact.room,
             profile: contact.image ? { uri: contact.image } : emoGirlIcon,
+            info: contact.info,
           }));
           setContacts(lastcontacts)
         })

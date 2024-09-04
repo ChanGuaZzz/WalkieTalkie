@@ -41,6 +41,7 @@ export default function AddGroupsScreen() {
         const roomsData = res.data.map((room) => ({
           name: room.name,
           profile: room.image ? { uri: room.image } : GroupIcon,
+          info: room.info,
         }));
         setrooms(roomsData);
         setroomFound(true);

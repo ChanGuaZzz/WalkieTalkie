@@ -22,9 +22,17 @@ const ProfileSettings = () => {
   const [username, setUsername] = useState("");
   const [userEmail, setuserEmail] = useState("");
   const [userID, setUserID] = useState("");
-  // Sessions
-
-  // Get username
+  const [userInfo, setUserInfo] = useState("");
+  const [currentProp, setCurrentProp] = useState("");
+  const [entireUserInfo, setEntireUserInfo] = useState("");
+  // Set the maximum length for the user info in the UI
+  const MAX_LENGTH = 30;
+  const truncatedInfo = (info) => {
+    return info.length > MAX_LENGTH
+      ? `${info.substring(0, MAX_LENGTH)}...`
+      : info;
+  };
+  // Get session
   useEffect(() => {
     axios.get('http://localhost:3000/getsession', { withCredentials: true })
       .then((res) => {
@@ -32,20 +40,20 @@ const ProfileSettings = () => {
         setUsername(res.data.user.username)
         setuserEmail(res.data.user.email)
         setUserID(res.data.user.id)
+        setEntireUserInfo(res.data.user.info)
+        setUserInfo(truncatedInfo(res.data.user.info)); (res.data.user.info);
       })
       .catch((error) => { console.log(error) });
   }, []);
 
-  useEffect(() => {
-    console.log("username", username);
-    console.log("userEmail", userEmail);
-  }, [username, userEmail]);
 
   const refreshSession = () => {
     axios.post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true })
       .then((res) => {
         setUsername(res.data.user.username);
         setuserEmail(res.data.user.email);
+        setEntireUserInfo(res.data.user.info)
+        setUserInfo(truncatedInfo(res.data.user.info)); (res.data.user.info);
       }).catch((error) => { console.log(error) });
   };
   // Change profile picture
@@ -72,13 +80,15 @@ const ProfileSettings = () => {
       setPropToChange("password");
       setModalIcon("lock-closed-outline");
       setIsPassword(true);
-    } else if (id === "username") {
-      setPropToChange("username");
+    } else if (id === "info") {
+      setPropToChange("info");
       setModalIcon("person-outline");
+      setCurrentProp(entireUserInfo);
       setIsPassword(false);
     } else if (id === "email") {
       setPropToChange("email");
       setModalIcon("mail-outline");
+      setCurrentProp(userEmail);
       setIsPassword(false);
     }
     setChangeProfileModalVisible(true);
@@ -148,18 +158,19 @@ const ProfileSettings = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={tw`flex-1 bg-[${backgroundColor}]`}>
-        <View style={tw`w-full h-1/3 flex items-center justify-center`}>
+        <View style={tw`w-full h-1/3 flex items-center justify-center mt-2`}>
           <View style={tw`bg-red-600 h-42 w-42 rounded-full relative`}>
             <TouchableOpacity onPress={onChangePicture} style={tw`bg-yellow-600 h-12 w-12 rounded-full absolute bottom-0 right-0 m-1 flex items-center justify-center`}>
               <Ionicons name="image-outline" size={24} color={textColor} />
             </TouchableOpacity>
           </View>
+          <Text style={tw`text-[${textColor}] text-lg`}>{username}</Text>
         </View>
         <View style={tw`w-full flex items-center justify-center gap-5`}>
-          {/* User name */}
+          {/* User info */}
           <Pressable
-            onPressIn={() => handlePress("username")}
-            onPressOut={() => handlePressOut("username")}
+            onPressIn={() => handlePress("info")}
+            onPressOut={() => handlePressOut("info")}
             onPressMove={handleMove}
             style={tw`w-full flex flex-col items-start px-1`}>
             <View style={tw`w-full flex flex-row items-center`}>
@@ -169,14 +180,14 @@ const ProfileSettings = () => {
               <View style={tw`w-5/6 flex flex-col border-b border-gray-400 py-3 ml-2`}>
                 <View style={tw`flex-row w-full justify-between items-center`}>
                   <View>
-                    <Text style={tw`text-[${disabledText}] mb-1`}>User name</Text>
-                    <Text style={tw`text-[${textColor}]`}>{username}</Text>
+                    <Text style={tw`text-[${disabledText}] mb-1`}>Info</Text>
+                    <Text style={tw`text-[${textColor}]`}>{userInfo}</Text>
                   </View>
                   <Ionicons name="build-outline" size={20} color={textColor} />
                 </View>
               </View>
             </View>
-            {activePressable === "username" && <Animated.View style={[tw`absolute left-0 top-0 bottom-0`, animatedStyle]} />}
+            {activePressable === "info" && <Animated.View style={[tw`absolute left-0 top-0 bottom-0`, animatedStyle]} />}
           </Pressable>
           {/* Email */}
           <Pressable
@@ -225,7 +236,7 @@ const ProfileSettings = () => {
         </View>
         {/* ChangeProfileModal */}
         {ChangeProfileModalVisible && (
-          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} refreshSession={refreshSession} userID={userID} />
+          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} refreshSession={refreshSession} userID={userID} currentProp={currentProp} />
         )}
       </SafeAreaView>
     </GestureHandlerRootView>

@@ -5,16 +5,20 @@ import tw from "twrnc";
 import { useThemeColor } from "../../hooks/useThemeColor";
 import axios from "axios";
 
-const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPassword, refreshSession, userID }) => {
+const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPassword, refreshSession, userID, currentProp }) => {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const [newProp, setNewProp] = useState("");
 
+  useEffect(() => {
+    if (!isPassword) {
+      setNewProp(currentProp);
+    }
+  }, [isPassword, currentProp]);
   // Update the user
   const updateUser = () => {
-    console.log("userID", userID);
-    console.log("propToChange", PropToChange);
-    console.log("newProp", newProp);
+    console.log('propToChange', PropToChange)
+    console.log('newProp', newProp)
     axios.post('http://localhost:3000/update-user', {
       userID: userID,
       PropToChange: PropToChange,
@@ -38,7 +42,9 @@ const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPas
           <Text style={tw`text-lg font-bold mb-4 text-[${textColor}]`}>Change your {PropToChange}</Text>
           <View style={tw`flex-row items-center border border-gray-300 rounded p-2`}>
             <Ionicons name={ModalIcon} size={20} color="gray" style={tw`mr-2`} />
-            <TextInput placeholder={`Enter new ${PropToChange}`} secureTextEntry={isPassword} style={tw`flex-1 text-[${textColor}]`} onChange={(e) => { setNewProp(e.target.value) }} />
+            <TextInput placeholder={`Enter new ${PropToChange}`} value={newProp}
+
+              secureTextEntry={isPassword} style={tw`flex-1 text-[${textColor}]`} onChange={(e) => { setNewProp(e.target.value) }} />
           </View>
           <TouchableOpacity
             style={tw`mt-4 bg-blue-500 rounded p-2 items-center`}
