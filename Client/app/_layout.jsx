@@ -19,47 +19,51 @@ import RequestIcon from '../components/RequestIcon';
 
 export default function RootLayout() {
   const [modalIconVisible, setModalIconVisible] = useState(false);
-  const SoftbackgroundColor = useThemeColor({}, 'Softbackground');
-  const textColor = useThemeColor({}, 'text');
-  const [username, setUsername] = useState('username');
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const SoftbackgroundColor = useThemeColor({}, "Softbackground");
+  const textColor = useThemeColor({}, "text");
+  const [username, setUsername] = useState("username");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
 
   SetLayoutLogged = (value) => {
-    setIsLoggedIn(value)
+    setIsLoggedIn(value);
   };
 
   // Controla si la sesión esta logeada
   useEffect(() => {
-    checkLoginStatus()
+    checkLoginStatus();
   }, []);
 
   const checkLoginStatus = async () => {
-    const loggedIn = await AsyncStorage.getItem('isLoggedIn');
-    setIsLoggedIn(loggedIn === 'true');
+    const loggedIn = await AsyncStorage.getItem("isLoggedIn");
+    setIsLoggedIn(loggedIn === "true");
   };
 
   const { SERVER_URL } = getEnvVars();
   const { SOCKET_URL } = getEnvVars();
   useEffect(() => {
-    axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
+    axios
+      .get(`http://localhost:3000/getsession`, { withCredentials: true })
       // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
       .then((res) => {
-        setUsername(res.data.user.username)
+        setUsername(res.data.user.username);
       })
-      .catch((error) => { console.log(error) });
-  }, [isLoggedIn])
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [isLoggedIn]);
 
   // logout
   const handleLogout = async () => {
-    axios.post(`${SERVER_URL}/logout`)
+    axios
+      .post(`${SERVER_URL}/logout`)
       .then((res) => {
         if (socket) {
-          socket.disconnect();  // Desconectar el socket al desloguear
-          console.log('Socket desconectado en logout');
+          socket.disconnect(); // Desconectar el socket al desloguear
+          console.log("Socket desconectado en logout");
           setIsSocketConnected(false);
         }
-        AsyncStorage.removeItem('isLoggedIn');
+        AsyncStorage.removeItem("isLoggedIn");
         setIsLoggedIn(false);
       })
       .catch((error) => {
@@ -70,31 +74,29 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (socket != null) {
-      socket.on('connect', () => {
+      socket.on("connect", () => {
         setIsSocketConnected(true);
-        console.log('ESTA CONECTADO');
+        console.log("ESTA CONECTADO");
       });
     }
   }, [socket]);
 
-useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la app
+  useEffect(() => {
+    // UseEffect para recibir los audios en cualquier parte de la app
     if (socket != null) {
-      socket.on('receive-audio', async (base64Audio, room) => {
-        console.log('Received audio data from room', room);
+      socket.on("receive-audio", async (base64Audio, room) => {
+        console.log("Received audio data from room", room);
         const uri = `data:audio/wav;base64,${base64Audio}`;
         console.log("audio enviado", uri);
 
         // Play audio using expo-av
-        const { sound } = await Audio.Sound.createAsync(
-          { uri },
-          { shouldPlay: true }
-        );
+        const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
         await sound.setVolumeAsync(1.0); // Ensure volume is set to maximum
         await sound.playAsync();
       });
 
       return () => {
-        socket.off('receive-audio');
+        socket.off("receive-audio");
       };
     }
   }, [socket]);
@@ -117,11 +119,9 @@ useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la 
                   ),
                   headerRight: () => (
                     <View style={tw`flex-row`}>
-                    <RequestIcon handleLogout={handleLogout} />
-                    <ConfigIcon handleLogout={handleLogout} />
-                    </View>
-
-                  ),
+                      <RequestIcon handleLogout={handleLogout} />
+                      <ConfigIcon handleLogout={handleLogout} />
+                    </View>),
                   headerTitle: '',
                   headerTitleAlign: 'center',
                   headerStyle: tw`bg-[${SoftbackgroundColor}]`,
@@ -187,6 +187,16 @@ useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la 
                   headerTitle: 'Settings',
                 }}
               />
+              <Stack.Screen
+                name="ProfilePhoto"
+                options={{
+                  headerStyle: {
+                    backgroundColor: SoftbackgroundColor,
+                  },
+                  headerTintColor: textColor,
+                  headerTitle: "Profile Photo",
+                }}
+              />
             </Stack >
           </SocketProvider>
 
@@ -197,6 +207,7 @@ useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la 
 
         {/* Alvaro comentam PRIMERO arriba del todo, después desde el ' ) ' hasta aqui  */}
 
+        {/* Alvaro comentam PRIMERO arriba del todo, después desde el ' ) ' hasta aqui  */}
       </SafeAreaView>
     </GestureHandlerRootView>
   );

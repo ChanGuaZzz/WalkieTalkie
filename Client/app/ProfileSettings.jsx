@@ -28,33 +28,39 @@ const ProfileSettings = () => {
   // Set the maximum length for the user info in the UI
   const MAX_LENGTH = 30;
   const truncatedInfo = (info) => {
-    return info.length > MAX_LENGTH
-      ? `${info.substring(0, MAX_LENGTH)}...`
-      : info;
+    return info.length > MAX_LENGTH ? `${info.substring(0, MAX_LENGTH)}...` : info;
   };
   // Get session
   useEffect(() => {
-    axios.get('http://localhost:3000/getsession', { withCredentials: true })
+    axios
+      .get("http://localhost:3000/getsession", { withCredentials: true })
       .then((res) => {
-        console.log('res', res)
-        setUsername(res.data.user.username)
-        setuserEmail(res.data.user.email)
-        setUserID(res.data.user.id)
-        setEntireUserInfo(res.data.user.info)
-        setUserInfo(truncatedInfo(res.data.user.info)); (res.data.user.info);
+        console.log("res", res);
+        setUsername(res.data.user.username);
+        setuserEmail(res.data.user.email);
+        setUserID(res.data.user.id);
+        setEntireUserInfo(res.data.user.info);
+        setUserInfo(truncatedInfo(res.data.user.info));
+        res.data.user.info;
       })
-      .catch((error) => { console.log(error) });
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
-
   const refreshSession = () => {
-    axios.post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true })
+    axios
+      .post(`http://localhost:3000/refreshSession`, { id: userID }, { withCredentials: true })
       .then((res) => {
         setUsername(res.data.user.username);
         setuserEmail(res.data.user.email);
-        setEntireUserInfo(res.data.user.info)
-        setUserInfo(truncatedInfo(res.data.user.info)); (res.data.user.info);
-      }).catch((error) => { console.log(error) });
+        setEntireUserInfo(res.data.user.info);
+        setUserInfo(truncatedInfo(res.data.user.info));
+        res.data.user.info;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
   // Change profile picture
   const onChangePicture = async () => {
@@ -159,11 +165,11 @@ const ProfileSettings = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={tw`flex-1 bg-[${backgroundColor}]`}>
         <View style={tw`w-full h-1/3 flex items-center justify-center mt-2`}>
-          <View style={tw`bg-red-600 h-42 w-42 rounded-full relative`}>
+          <TouchableOpacity style={tw`bg-red-600 h-42 w-42 rounded-full relative`} onPress={() => navigation.navigate("ProfilePhoto")}>
             <TouchableOpacity onPress={onChangePicture} style={tw`bg-yellow-600 h-12 w-12 rounded-full absolute bottom-0 right-0 m-1 flex items-center justify-center`}>
               <Ionicons name="image-outline" size={24} color={textColor} />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
           <Text style={tw`text-[${textColor}] text-lg`}>{username}</Text>
         </View>
         <View style={tw`w-full flex items-center justify-center gap-5`}>
@@ -236,7 +242,15 @@ const ProfileSettings = () => {
         </View>
         {/* ChangeProfileModal */}
         {ChangeProfileModalVisible && (
-          <ChangeProfileModal ModalIcon={ModalIcon} PropToChange={PropToChange} setModalVisibility={setModalVisibility} isPassword={isPassword} refreshSession={refreshSession} userID={userID} currentProp={currentProp} />
+          <ChangeProfileModal
+            ModalIcon={ModalIcon}
+            PropToChange={PropToChange}
+            setModalVisibility={setModalVisibility}
+            isPassword={isPassword}
+            refreshSession={refreshSession}
+            userID={userID}
+            currentProp={currentProp}
+          />
         )}
       </SafeAreaView>
     </GestureHandlerRootView>
