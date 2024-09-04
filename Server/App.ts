@@ -56,6 +56,7 @@ class Users extends Model {
   declare groups: string;
   declare contacts: string;
   declare profilePicture: string;
+  declare requests: string;
 
   // Method to set the password, hashes password and sets the password
   setPassword(password: string): void {
@@ -78,6 +79,10 @@ class Users extends Model {
   // Method to set the contacts, stringifies contacts and sets the contacts
   setcontacts(contacts: object): void {
     this.contacts = JSON.stringify(contacts);
+  }
+
+  setrequests(requests: object): void {
+    this.requests = JSON.stringify(requests);
   }
 
   toString(): string {
@@ -121,6 +126,11 @@ Users.init(
     profilePicture: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    requests: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
     },
   },
   {
@@ -249,6 +259,7 @@ app.post('/login', async (req, res) => {
     user.dataValues.password = undefined; // Remove password from user info
     user.dataValues.groups = JSON.parse(user.dataValues.groups); // parsea los grupos de usuario
     user.dataValues.contacts = JSON.parse(user.dataValues.contacts); // Remove contacts from user info
+    user.dataValues.requests = JSON.parse(user.dataValues.requests); // Remove contacts from user info
     console.log('UserValuesLISTOS:', user.dataValues);
     req.session.user = user.dataValues; // Store user info in session
     req.session.save();
@@ -271,6 +282,7 @@ app.post('/refreshSession', async (req, res) => {
     user.dataValues.password = undefined; // Remove password from user info
     user.dataValues.groups = JSON.parse(user.dataValues.groups); // Remove groups from user info
     user.dataValues.contacts = JSON.parse(user.dataValues.contacts); // Remove contacts from user info
+    user.dataValues.requests = JSON.parse(user.dataValues.requests); // Remove contacts from user info
     req.session.user = user.dataValues; // Store user info in session
     req.session.save();
     res.json(req.session);
@@ -539,9 +551,40 @@ io.on('connection', (socket: Socket) => {
   // =================================================================
   // *Socket send request*
   // =================================================================
-  socket.on('send_request', (data: { senderId: string; receiverId: string }) => {
+  socket.on('send_request',async (data: { senderId: string; receiverId: string }) => {
     const { senderId, receiverId } = data;
     const receiverSocketId = connectedUsers[receiverId];
+
+    const userA = await Users.findOne({ 
+      where: { 
+        username: receiverId 
+      } 
+    });
+
+    const userB = await Users.findOne({
+      where: {
+        username: senderId,
+      },
+    });
+    if (userA && userA !== null && userA.requests !== null && userB && userB !== null && userB.requests !== null) {
+          let requestsA = JSON.parse(userA.requests);
+          
+          if (typeof requestsA === 'string') {
+            requestsA = JSON.parse(requestsA);
+          }
+          const newrequest = { username: senderId, profile: userB.profilePicture };
+          if (!requestsA.some((r: any) => r.username === newrequest.username)) {
+            // se verifica si la solicitud ya esta en la lista
+            requestsA.push(newrequest);
+            userA.setrequests(requestsA);
+            userA.save().then(() => {
+              console.log('La solicitud ha sido guardada exitosamente.');
+              io.to(receiverSocketId).emit('refreshrequests'); // se envia la señal para que se actualicen las solicitudes en tiempo real
+            });
+          } else {
+            console.log('Ya esta en las solicitudes');
+          }
+    }
 
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('receive_request', { senderId });
@@ -574,15 +617,28 @@ io.on('connection', (socket: Socket) => {
         username: data.receiverId,
       },
     });
+
+
     savecontacts(userSender, data.receiverId, currentRoom);
     savecontacts(userReceiver, data.senderId, currentRoom);
 
-    io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
     io.to(senderSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen los contactos en tiempo real
 
-    if (receiverSocket !== undefined) {
-      // receiverSocket.emit('join', { currentRoom: currentRoom, userID: receiverId, forContacts: true }); // el usuario que acepto la solicitud se une a la sala con el usuario que envio la solicitud
+    if (receiverSocket !== undefined && userReceiver !== null) {
       receiverSocket.join(currentRoom);
+      let requestsReceiver = JSON.parse(userReceiver.requests);
+
+      if (typeof requestsReceiver === 'string') {
+        requestsReceiver = JSON.parse(requestsReceiver);
+      }
+
+      const updatedRequests = requestsReceiver.filter((r: any) => r.username !== senderId);
+      userReceiver.setrequests(updatedRequests);
+      userReceiver.save().then(() => {
+        console.log('La solicitud ha sido eliminada exitosamente.');
+        io.to(receiverSocketId).emit('refreshcontacts'); // se envia la señal para que se actualicen las solicitudes en tiempo real
+      });
+
     }
     if (senderSocketId && senderSocket !== undefined) {
       // senderSocket.emit('join', { currentRoom: currentRoom, userID: senderId, forContacts: true }); // el usuario que envio la solicitud se une a la sala con el usuario que acepto la solicitud

@@ -29,12 +29,6 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
       .catch((error) => { console.log(error) });
   }, []);
 
-  useEffect(() => {
-    if (isrequest) {
-      user.name= user.username;
-    }
-  }, [isrequest]);
-
   const onClickButton = () => {
     if (iscontact) {
       socket.emit('deleteContact', { username: username, contact: user });
@@ -48,7 +42,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
   }
 
   const onAccept = () => {
-    socket.emit('acceptRequest', { username: username, contact: user.name });
+    socket.emit('accept_request', { senderId: user.username , receiverId: username });
     console.log('Friend added', user.room);
     Vibration.vibrate(50);
   }
@@ -70,7 +64,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
       <View style={tw`flex-1 flex-row items-center`}>
         <View style={tw`flex-1 flex-row  items-center justify-between`}>
           <View style={tw`ml-3 ${isrequest&&"w-[60%]"}`}>
-            <Text style={[{ fontSize: 16 }, tw`font-bold text-[${textColor}]`]}>{user.name}</Text>
+            <Text style={[{ fontSize: 16 }, tw`font-bold text-[${textColor}]`]}>{isrequest?user.username:user.name}</Text>
             {isrequest ? <Text style={tw`text-gray-400 `}>sent you a request</Text> 
             :<Text style={tw`text-gray-400 `}>Last time: "2 days ago"</Text>
             }
