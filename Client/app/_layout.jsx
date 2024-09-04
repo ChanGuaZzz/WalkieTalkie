@@ -201,11 +201,9 @@ export default function RootLayout() {
           </SocketProvider>
 
         ) : (
-          //If not logged in, show the LoginScreen without navigation
+          //If not logged in, show the LoginScreen without navigation */}
           <MainLogin SetLayoutLogged={SetLayoutLogged} />
         )}
-
-        {/* Alvaro comentam PRIMERO arriba del todo, después desde el ' ) ' hasta aqui  */}
 
         {/* Alvaro comentam PRIMERO arriba del todo, después desde el ' ) ' hasta aqui  */}
       </SafeAreaView>

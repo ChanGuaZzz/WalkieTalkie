@@ -1,5 +1,5 @@
-import { React, useState, useEffect, Platform } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import { React, useState, useEffect } from "react";
+import { Modal, View, Text, TextInput, TouchableOpacity, Alert, Platform } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import tw from "twrnc";
 import { useThemeColor } from "../../hooks/useThemeColor";
@@ -32,7 +32,7 @@ const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPas
       return false;
     }
     if (isPassword && newProp.trim().length < 8) {
-      showAlert("Invalid password", "Password must be at least 8 characters long.");
+      showAlert("Invalid password", "Password must be at least 8 characters.");
       return false;
     }
     if (PropToChange === "email") {
@@ -46,7 +46,6 @@ const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPas
       showAlert("Invalid info", "Info must be less than 120 characters.");
       return false;
     }
-    setValidForm(true);
     return true;
   };
 
@@ -89,8 +88,9 @@ const ChangeProfileModal = ({ PropToChange, setModalVisibility, ModalIcon, isPas
               value={newProp}
               secureTextEntry={isPassword}
               style={tw`flex-1 text-[${textColor}]`}
-              onChange={(e) => {
-                setNewProp(e.target.value);
+              onChangeText={(text) => {
+                setNewProp(text);
+                console.log(newProp);
               }}
             />
           </View>
