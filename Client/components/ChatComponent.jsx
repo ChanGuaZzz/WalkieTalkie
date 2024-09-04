@@ -17,10 +17,12 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
   const [socket, setSocket] = useState(useSocket()); // Estado para manejar la instancia del socket
   const [userInfo, setUserInfo] = useState();
 
+  //**************Recupera la session para hacer la comunicacion entre los dos usuarios al añadir**************** */
   useEffect(() => {
     axios.get(`http://localhost:3000/getsession`, { withCredentials: true })
       // axios.get(`${SERVER_URL}/getsession`, { withCredentials: true })
       .then((res) => {
+        console.log('SESIONEEEEEES CHATCOMPENTE', res.data);
         setusername(res.data.user.username);
         setUserInfo(res.data.user.info);
       })
@@ -63,7 +65,7 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => 
         modalIconVisible={modalIconVisible}
         setModalIconVisible={setModalIconVisible}
         iconSize={14}
-        userInfo={userInfo}
+        
       />
       <View style={tw`flex-1 flex-row items-center`}>
         <View style={tw`flex-1 flex-row  items-center justify-between`}>
