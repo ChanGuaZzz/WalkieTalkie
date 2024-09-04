@@ -10,7 +10,7 @@ const { SERVER_URL } = getEnvVars();
 import { useSocket } from '../components/context/SocketContext';
 
 
-const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
+const ChatComponent = ({ user, onPress, icon, onAdd, iscontact, isrequest }) => {
   const textColor = useThemeColor({}, 'text');
   const [modalIconVisible, setModalIconVisible] = useState(false);
   const [username, setusername] = useState();
@@ -27,6 +27,12 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
       .catch((error) => { console.log(error) });
   }, []);
 
+  useEffect(() => {
+    if (isrequest) {
+      user.name= user.username;
+    }
+  }, [isrequest]);
+
   const onClickButton = () => {
     if (iscontact) {
       socket.emit('deleteContact', { username: username, contact: user });
@@ -38,8 +44,20 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
       Vibration.vibrate(50);
     }
   }
+
+  const onAccept = () => {
+    socket.emit('acceptRequest', { username: username, contact: user });
+    console.log('Friend added', user.room);
+    Vibration.vibrate(50);
+  }
+
+  const onDecline = () => {
+    socket.emit('declineRequest', { username: username, contact: user });
+    console.log('Friend declined', user.room);
+    Vibration.vibrate(50);
+  }
   return (
-    <TouchableOpacity onPress={onPress} style={tw`p-2 flex flex-row w-full max-w-[700px] justify-center items-center`}>
+    <TouchableOpacity onPress={onPress} style={tw`${isrequest?"px-4 py-2":"p-2"} border-b border-zinc-800 flex flex-row w-full max-w-[700px] justify-center items-center`}>
       <UserProfileModal
         user={user}
         modalIconVisible={modalIconVisible}
@@ -48,21 +66,34 @@ const ChatComponent = ({ user, onPress, icon, onAdd, iscontact }) => {
         userInfo={userInfo}
       />
       <View style={tw`flex-1 flex-row items-center`}>
-        <View style={tw`flex-1 flex-row items-center justify-between`}>
-          <View style={tw`ml-3`}>
+        <View style={tw`flex-1 flex-row  items-center justify-between`}>
+          <View style={tw`ml-3 ${isrequest&&"w-[60%]"}`}>
             <Text style={[{ fontSize: 16 }, tw`font-bold text-[${textColor}]`]}>{user.name}</Text>
-            <Text style={tw`text-gray-400`}>Last time: "2 days ago"</Text>
+            {isrequest ? <Text style={tw`text-gray-400 `}>sent you a request</Text> 
+            :<Text style={tw`text-gray-400 `}>Last time: "2 days ago"</Text>
+            }
           </View>
-          <View style={tw``}>
-            {icon == 'mic' ? (
+          <View style={tw`${isrequest&&"w-[40%]"}`}>
+            {icon == 'mic' && isrequest == undefined && (
               <TouchableOpacity style={tw`px-5`} onPress={onClickButton}>
                 <Ionicons name="close-sharp" size={22} color={"red"} />
               </TouchableOpacity>
 
-            ) :
-              <TouchableOpacity style={tw`px-5`} onPress={onAdd}>
-                <Ionicons name="person-add" size={22} color={textColor} />
-              </TouchableOpacity>
+            )} {
+              icon !== 'mic' && isrequest == undefined && (
+                <TouchableOpacity style={tw`px-5`} onPress={onAdd}>
+                  <Ionicons name="person-add" size={22} color={textColor} />
+                </TouchableOpacity>)
+            }
+            {isrequest &&
+              <View style={tw`flex-row`}>
+                <TouchableOpacity style={tw`px-1`} onPress={onAccept}>
+                  <Ionicons name="checkmark-circle-sharp" size={22} color={"green"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={tw`px-1`} onPress={onDecline}>
+                  <Ionicons name="close-circle-sharp" size={22} color={"red"} />
+                </TouchableOpacity>
+              </View>
             }
           </View>
         </View>

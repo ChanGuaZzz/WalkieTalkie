@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketProvider } from '../components/context/SocketContext';
 import createSocket from '../components/context/CreateSocket';
 import { Audio } from 'expo-av';
+import RequestIcon from '../components/RequestIcon';
 
 export default function RootLayout() {
   const [modalIconVisible, setModalIconVisible] = useState(false);
@@ -115,7 +116,11 @@ useEffect(() => { // UseEffect para recibir los audios en cualquier parte de la 
                     </View>
                   ),
                   headerRight: () => (
+                    <View style={tw`flex-row`}>
+                    <RequestIcon handleLogout={handleLogout} />
                     <ConfigIcon handleLogout={handleLogout} />
+                    </View>
+
                   ),
                   headerTitle: '',
                   headerTitleAlign: 'center',

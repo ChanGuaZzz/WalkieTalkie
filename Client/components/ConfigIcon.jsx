@@ -18,7 +18,7 @@ const ConfigIcon = ({ handleLogout }) => {
   };
 
   return (
-    <View style={tw`relative`}>
+    <View style={tw`relative mx-3`}>
       <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
         <Ionicons name="settings-outline" size={24} color={textColor} />
       </TouchableOpacity>
